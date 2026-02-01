@@ -506,7 +506,7 @@ input {
   grid-column: 3;
   align-content: start;
   justify-items: center;
-  margin-top: 8px;
+  margin-top: 18px;
 }
 
 .mini-card {
@@ -794,7 +794,7 @@ input {
 
   .is-playing .mobile-tray {
     display: grid;
-    margin-top: 6px;
+    margin-top: 16px;
   }
 
   .board-frame {

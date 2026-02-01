@@ -42,7 +42,6 @@ const DISSOLVE_RATE = 0.2;
 const MATCH_MIN = BLOCK * BLOCK * 7;
 const MATCH_FLASH_TIME = 1600;
 const MATCH_FLASH_INTERVAL = 220;
-const MATCH_SCAN_INTERVAL = 500;
 const WIND_FACTOR = 0.2;
 
 canvas.width = GRID_W;
@@ -144,9 +143,9 @@ let dissolveQueue = [];
 let dissolveIndex = 0;
 let dissolveAccumulator = 0;
 let dissolveColor = 1;
+let lastMatchSeeds = null;
 let matchActive = false;
 let matchTimer = 0;
-let matchScanTimer = 0;
 
 let score = 0;
 let lines = 0;
@@ -245,14 +244,17 @@ function triggerMatchScan() {
   if (matchActive) return false;
   matchVisited.fill(0);
   matchMask.fill(0);
+  const seeds = Array.isArray(lastMatchSeeds) ? lastMatchSeeds : null;
+  if (!seeds || seeds.length === 0) return false;
   let bestGroup = null;
   let bestSize = 0;
-  for (let i = 0; i < grid.length; i++) {
-    const color = grid[i];
-    if (!color || matchVisited[i]) continue;
-    const stack = [i];
+  for (const seed of seeds) {
+    if (seed < 0 || seed >= grid.length) continue;
+    const color = grid[seed];
+    if (!color || matchVisited[seed]) continue;
+    const stack = [seed];
     const group = [];
-    matchVisited[i] = 1;
+    matchVisited[seed] = 1;
     while (stack.length) {
       const idx = stack.pop();
       group.push(idx);
@@ -286,22 +288,18 @@ function triggerMatchScan() {
         }
       }
     }
-    if (group.length >= MATCH_MIN) {
-      if (group.length > bestSize) {
-        bestSize = group.length;
-        bestGroup = group;
-      }
+    if (group.length >= MATCH_MIN && group.length > bestSize) {
+      bestSize = group.length;
+      bestGroup = group;
     }
   }
-  if (bestGroup) {
-    for (const idx of bestGroup) {
-      matchMask[idx] = 1;
-    }
-    matchActive = true;
-    matchTimer = 0;
-    return true;
+  if (!bestGroup) return false;
+  for (const idx of bestGroup) {
+    matchMask[idx] = 1;
   }
-  return false;
+  matchActive = true;
+  matchTimer = 0;
+  return true;
 }
 
 function refillBag() {
@@ -462,7 +460,6 @@ function startGame() {
   dissolveAccumulator = 0;
   matchActive = false;
   matchTimer = 0;
-  matchScanTimer = 0;
   running = true;
   paused = false;
   gameOver = false;
@@ -591,6 +588,7 @@ function startDissolve() {
     dissolveQueue.push(idx);
     dissolveMask[idx] = 1;
   });
+  lastMatchSeeds = dissolveQueue.slice();
   for (let i = dissolveQueue.length - 1; i > 0; i--) {
     const j = (Math.random() * (i + 1)) | 0;
     [dissolveQueue[i], dissolveQueue[j]] = [dissolveQueue[j], dissolveQueue[i]];
@@ -609,6 +607,8 @@ function finishDissolve() {
     activeTraySlot = null;
   }
   updateHud();
+  triggerMatchScan();
+  lastMatchSeeds = null;
 }
 
 function clearRows() {
@@ -794,18 +794,10 @@ function update(dt) {
       matchMask.fill(0);
       matchActive = false;
       matchTimer = 0;
-      matchScanTimer = 0;
       if (removed > 0) {
         score += Math.floor(removed / 3);
         updateHud();
       }
-      triggerMatchScan();
-    }
-  } else {
-    matchScanTimer += dt;
-    if (matchScanTimer >= MATCH_SCAN_INTERVAL) {
-      matchScanTimer = 0;
-      triggerMatchScan();
     }
   }
 
