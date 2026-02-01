@@ -9,8 +9,6 @@ const holdCanvas = document.getElementById("hold");
 const overlay = document.getElementById("overlay");
 const overlayTitle = document.getElementById("overlay-title");
 const overlayText = document.getElementById("overlay-text");
-const menuSandCanvas = document.getElementById("menu-sand");
-const menuSandCtx = menuSandCanvas ? menuSandCanvas.getContext("2d") : null;
 const leaderboardList = document.getElementById("leaderboard-list");
 const rankValue = document.getElementById("rank-value");
 const rankScore = document.getElementById("rank-score");
@@ -50,7 +48,6 @@ const WIND_FACTOR = 0.2;
 canvas.width = GRID_W;
 canvas.height = GRID_H;
 ctx.imageSmoothingEnabled = false;
-if (menuSandCtx) menuSandCtx.imageSmoothingEnabled = false;
 
 const nextCtx = nextCanvas ? nextCanvas.getContext("2d") : null;
 const trayCtxs = trayCanvases.map((canvas) => (canvas ? canvas.getContext("2d") : null));
@@ -128,9 +125,6 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
-function randRange(min, max) {
-  return min + Math.random() * (max - min);
-}
 
 function rgb(color) {
   return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
@@ -154,10 +148,6 @@ let dissolveColor = 1;
 let lastMatchSeeds = null;
 let matchActive = false;
 let matchTimer = 0;
-const menuSandState = {
-  particles: [],
-  spawnTimer: 0,
-};
 
 let score = 0;
 let lines = 0;
@@ -427,114 +417,6 @@ function updateHud() {
   if (levelMobileEl) levelMobileEl.textContent = level.toString();
 }
 
-function resizeMenuSand() {
-  if (!menuSandCanvas || !menuSandCtx) return;
-  const rect = menuSandCanvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  const width = Math.max(1, Math.floor(rect.width * dpr));
-  const height = Math.max(1, Math.floor(rect.height * dpr));
-  if (menuSandCanvas.width !== width || menuSandCanvas.height !== height) {
-    menuSandCanvas.width = width;
-    menuSandCanvas.height = height;
-  }
-  menuSandCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-}
-
-if (menuSandCanvas && menuSandCtx) {
-  resizeMenuSand();
-  window.addEventListener("resize", resizeMenuSand);
-}
-
-function spawnMenuSandBurst(width) {
-  const count = 6 + ((Math.random() * 5) | 0);
-  for (let i = 0; i < count; i++) {
-    menuSandState.particles.push({
-      type: "fall",
-      x: randRange(6, width - 6),
-      y: randRange(-18, -4),
-      vx: randRange(-0.035, 0.035),
-      vy: randRange(0.08, 0.18),
-      size: randRange(1.8, 3.2),
-      life: randRange(1200, 1900),
-      ttl: randRange(1200, 1900),
-      tint: randRange(-10, 10),
-    });
-  }
-}
-
-function updateMenuSand(dt) {
-  if (!menuSandCanvas || !menuSandCtx) return;
-  if (!overlay || overlay.classList.contains("hidden") || overlay.dataset.state !== "menu") {
-    menuSandState.particles.length = 0;
-    menuSandState.spawnTimer = 0;
-    menuSandCtx.clearRect(0, 0, menuSandCanvas.width, menuSandCanvas.height);
-    return;
-  }
-  const width = menuSandCanvas.clientWidth;
-  const height = menuSandCanvas.clientHeight;
-  if (!width || !height) return;
-
-  menuSandState.spawnTimer -= dt;
-  if (menuSandState.spawnTimer <= 0) {
-    spawnMenuSandBurst(width);
-    menuSandState.spawnTimer = randRange(420, 1100);
-  }
-
-  const floorY = height - 8;
-  const gravity = 0.0021;
-
-  menuSandCtx.clearRect(0, 0, width, height);
-
-  for (let i = menuSandState.particles.length - 1; i >= 0; i--) {
-    const p = menuSandState.particles[i];
-    p.life -= dt;
-    if (p.life <= 0) {
-      menuSandState.particles.splice(i, 1);
-      continue;
-    }
-
-    if (p.type === "fall") {
-      p.vy += gravity * dt;
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      if (p.y >= floorY) {
-        const splashCount = 2 + ((Math.random() * 3) | 0);
-        for (let s = 0; s < splashCount; s++) {
-          menuSandState.particles.push({
-            type: "splash",
-            x: p.x,
-            y: floorY,
-            vx: randRange(-0.12, 0.12),
-            vy: randRange(-0.32, -0.12),
-            size: randRange(1, 1.8),
-            life: randRange(420, 820),
-            ttl: randRange(420, 820),
-            tint: randRange(-12, 12),
-          });
-        }
-        menuSandState.particles.splice(i, 1);
-        continue;
-      }
-    } else {
-      p.vy += gravity * dt * 0.6;
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.vx *= 0.985;
-      if (p.y > floorY + 6) {
-        menuSandState.particles.splice(i, 1);
-        continue;
-      }
-    }
-
-    const alpha = clamp(p.life / p.ttl, 0, 1);
-    const base = p.type === "splash" ? [255, 225, 140] : [245, 208, 110];
-    const r = clamp(base[0] + p.tint, 0, 255);
-    const g = clamp(base[1] + p.tint, 0, 255);
-    const b = clamp(base[2] + p.tint, 0, 255);
-    menuSandCtx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.85 * alpha})`;
-    menuSandCtx.fillRect(p.x, p.y, p.size, p.size);
-  }
-}
 
 function showMenu() {
   overlay.dataset.state = "menu";
@@ -542,7 +424,6 @@ function showMenu() {
   document.body.classList.remove("is-playing");
   renderLeaderboard(loadLeaderboard());
   updateMenuStats();
-  requestAnimationFrame(resizeMenuSand);
 }
 
 function showAbout() {
@@ -1423,7 +1304,6 @@ function loop(time) {
     update(dt);
     render();
   }
-  updateMenuSand(dt);
   requestAnimationFrame(loop);
 }
 
