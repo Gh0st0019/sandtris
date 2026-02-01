@@ -242,9 +242,11 @@ function renderLeaderboard(list) {
 }
 
 function triggerMatchScan() {
-  if (matchActive) return false;
+  const wasActive = matchActive;
   matchVisited.fill(0);
-  matchMask.fill(0);
+  if (!wasActive) {
+    matchMask.fill(0);
+  }
   let found = false;
   for (let seed = 0; seed < grid.length; seed++) {
     const color = grid[seed];
@@ -256,6 +258,7 @@ function triggerMatchScan() {
       const idx = stack.pop();
       group.push(idx);
       const x = idx % GRID_W;
+      const y = (idx / GRID_W) | 0;
       if (x > 0) {
         const left = idx - 1;
         if (!matchVisited[left] && grid[left] === color) {
@@ -270,18 +273,46 @@ function triggerMatchScan() {
           stack.push(right);
         }
       }
-      if (idx >= GRID_W) {
+      if (y > 0) {
         const up = idx - GRID_W;
         if (!matchVisited[up] && grid[up] === color) {
           matchVisited[up] = 1;
           stack.push(up);
         }
+        if (x > 0) {
+          const upLeft = idx - GRID_W - 1;
+          if (!matchVisited[upLeft] && grid[upLeft] === color) {
+            matchVisited[upLeft] = 1;
+            stack.push(upLeft);
+          }
+        }
+        if (x < GRID_W - 1) {
+          const upRight = idx - GRID_W + 1;
+          if (!matchVisited[upRight] && grid[upRight] === color) {
+            matchVisited[upRight] = 1;
+            stack.push(upRight);
+          }
+        }
       }
-      if (idx < grid.length - GRID_W) {
+      if (y < GRID_H - 1) {
         const down = idx + GRID_W;
         if (!matchVisited[down] && grid[down] === color) {
           matchVisited[down] = 1;
           stack.push(down);
+        }
+        if (x > 0) {
+          const downLeft = idx + GRID_W - 1;
+          if (!matchVisited[downLeft] && grid[downLeft] === color) {
+            matchVisited[downLeft] = 1;
+            stack.push(downLeft);
+          }
+        }
+        if (x < GRID_W - 1) {
+          const downRight = idx + GRID_W + 1;
+          if (!matchVisited[downRight] && grid[downRight] === color) {
+            matchVisited[downRight] = 1;
+            stack.push(downRight);
+          }
         }
       }
     }
@@ -293,8 +324,10 @@ function triggerMatchScan() {
     }
   }
   if (!found) return false;
-  matchActive = true;
-  matchTimer = 0;
+  if (!wasActive) {
+    matchActive = true;
+    matchTimer = 0;
+  }
   return true;
 }
 
@@ -807,10 +840,8 @@ function update(dt) {
     for (let i = 0; i < SAND_STEPS; i++) {
       stepSand();
     }
-    if (pieceState !== "dissolving") {
-      triggerMatchScan();
-    }
   }
+  triggerMatchScan();
 }
 
 function renderPiece(color, offsetY, flashing) {
