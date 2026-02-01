@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Sandtris</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260201-18" />
+    <link rel="manifest" href="manifest.webmanifest?v=20260201-20" />
     <meta name="theme-color" content="#4b34b9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
-    <link rel="stylesheet" href="style.css?v=20260201-18" />
+    <link rel="stylesheet" href="style.css?v=20260201-20" />
   </head>
   <body>
     <div class="app">
@@ -28,10 +28,6 @@
             <div class="stat">
               <span class="label">Linee</span>
               <span id="lines">0</span>
-            </div>
-            <div class="stat">
-              <span class="label">Livello</span>
-              <span id="level">1</span>
             </div>
           </div>
           <div class="leaderboard">
@@ -62,12 +58,12 @@
             <div class="hud-bar">
               <span class="hud-left" id="lines-mobile">0</span>
               <span class="hud-center" id="score-mobile">0</span>
-              <span class="hud-right"><span class="hud-label">LV</span><span id="level-mobile">1</span></span>
             </div>
           </div>
           <div class="board-frame">
             <canvas id="game" width="70" height="140" aria-label="Sandtris board"></canvas>
             <div class="glass"></div>
+            <div class="match-toast" id="match-toast" aria-live="polite"></div>
             <div class="overlay" id="overlay" data-state="menu">
               <div class="overlay-screen overlay-screen--menu">
                 <div class="start-screen">
@@ -142,6 +138,6 @@
       </main>
     </div>
     <footer class="credit">Made with ❤️ by Ch3rry</footer>
-    <script src="app.js?v=20260201-18"></script>
+    <script src="app.js?v=20260201-20"></script>
   </body>
 </html>

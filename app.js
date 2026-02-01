@@ -13,15 +13,14 @@ const leaderboardList = document.getElementById("leaderboard-list");
 const rankValue = document.getElementById("rank-value");
 const rankScore = document.getElementById("rank-score");
 const menuBestEl = document.getElementById("menu-best");
+const matchToastEl = document.getElementById("match-toast");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
 const scoreMobileEl = document.getElementById("score-mobile");
 const bestTopEl = document.getElementById("best-top");
 const linesMobileEl = document.getElementById("lines-mobile");
-const levelMobileEl = document.getElementById("level-mobile");
 const linesEl = document.getElementById("lines");
-const levelEl = document.getElementById("level");
 
 const GRID_COLS = 10;
 const GRID_ROWS = 20;
@@ -357,6 +356,14 @@ function updateMenuStats() {
   renderBestScore();
 }
 
+function showMatchToast(points) {
+  if (!matchToastEl || points <= 0) return;
+  matchToastEl.textContent = `+${points}`;
+  matchToastEl.classList.remove("match-toast--show");
+  void matchToastEl.offsetWidth;
+  matchToastEl.classList.add("match-toast--show");
+}
+
 function refillBag() {
   bag = Object.keys(PIECE_DEFS);
   for (let i = bag.length - 1; i > 0; i--) {
@@ -459,8 +466,6 @@ function updateHud() {
   if (scoreMobileEl) scoreMobileEl.textContent = score.toString();
   linesEl.textContent = lines.toString();
   if (linesMobileEl) linesMobileEl.textContent = lines.toString();
-  levelEl.textContent = level.toString();
-  if (levelMobileEl) levelMobileEl.textContent = level.toString();
   updateBestScore(score);
   renderBestScore();
 }
@@ -853,8 +858,10 @@ function update(dt) {
       matchActive = false;
       matchTimer = 0;
       if (removed > 0) {
-        score += Math.floor(removed / 3);
+        const points = Math.floor(removed / 3);
+        score += points;
         updateHud();
+        showMatchToast(points);
       }
     }
   }

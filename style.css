@@ -225,7 +225,7 @@ input {
 .hud-bar {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
@@ -353,6 +353,29 @@ input {
   background: linear-gradient(180deg, #1f2946 0%, #141a2c 100%);
   box-shadow: 0 12px 0 var(--shadow), 0 0 22px rgba(60, 90, 140, 0.28);
   overflow: hidden;
+}
+
+.match-toast {
+  position: absolute;
+  left: 50%;
+  top: 18%;
+  transform: translate(-50%, -10px) scale(0.96);
+  padding: 6px 10px;
+  border: 3px solid #1b103d;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffd666, #f0b24d);
+  color: #2a1b66;
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 6px 0 #b6781d;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.match-toast--show {
+  animation: toast-pop 900ms ease forwards;
 }
 
 .board-frame::after {
@@ -830,6 +853,25 @@ input {
   }
   100% {
     transform: translate(-6px, 0);
+  }
+}
+
+@keyframes toast-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -14px) scale(0.92);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, 4px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 10px) scale(0.98);
   }
 }
 
