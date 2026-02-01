@@ -93,7 +93,6 @@ const PALETTE = [
   [238, 156, 100],
 ];
 
-const matchColors = new Uint8Array(PALETTE.length);
 
 const PIECE_DEFS = {
   I: { color: 1, cells: [[0, 1], [1, 1], [2, 1], [3, 1]] },
@@ -246,7 +245,6 @@ function triggerMatchScan() {
   if (matchActive) return false;
   matchVisited.fill(0);
   matchMask.fill(0);
-  matchColors.fill(0);
   let found = false;
   for (let i = 0; i < grid.length; i++) {
     const color = grid[i];
@@ -289,16 +287,12 @@ function triggerMatchScan() {
     }
     if (group.length >= MATCH_MIN) {
       found = true;
-      matchColors[color] = 1;
+      for (const idx of group) {
+        matchMask[idx] = 1;
+      }
     }
   }
   if (found) {
-    for (let i = 0; i < grid.length; i++) {
-      const color = grid[i];
-      if (color && matchColors[color]) {
-        matchMask[i] = 1;
-      }
-    }
     matchActive = true;
     matchTimer = 0;
   }
@@ -787,14 +781,12 @@ function update(dt) {
     if (matchTimer >= MATCH_FLASH_TIME) {
       let removed = 0;
       for (let i = 0; i < grid.length; i++) {
-        const color = grid[i];
-        if (color && matchColors[color]) {
+        if (matchMask[i]) {
           grid[i] = 0;
           removed += 1;
         }
       }
       matchMask.fill(0);
-      matchColors.fill(0);
       matchActive = false;
       matchTimer = 0;
       matchScanTimer = 0;
@@ -846,7 +838,7 @@ function render() {
       if (colorIndex === 0 && pieceState === "dissolving" && dissolveMask[index]) {
         colorIndex = dissolveColor;
       }
-      const matchedColor = matchActive && colorIndex && matchColors[colorIndex];
+      const matchedColor = matchActive && matchMask[index];
       const matchFlash = matchedColor && Math.floor(matchTimer / MATCH_FLASH_INTERVAL) % 2 === 0;
       const base = matchFlash ? [245, 245, 245] : PALETTE[colorIndex];
       const grainN = colorIndex === 0 ? (grain[index] >> 1) : grain[index];
