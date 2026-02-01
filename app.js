@@ -912,11 +912,24 @@ function drawPreview(previewCtx, type) {
   const offsetX = Math.floor((4 - width) / 2) - minX;
   const offsetY = Math.floor((4 - height) / 2) - minY;
   const size = previewCtx.canvas.width / 4;
-  previewCtx.fillStyle = rgb(PALETTE[PIECE_DEFS[type].color]);
+  const base = PALETTE[PIECE_DEFS[type].color];
+  const highlight = "rgba(255, 255, 255, 0.22)";
+  const shadow = "rgba(0, 0, 0, 0.28)";
+  const border = "rgba(0, 0, 0, 0.35)";
+  const pad = Math.max(1, Math.floor(size * 0.08));
+  const highlightH = Math.max(1, Math.floor(size * 0.22));
+  const shadowH = Math.max(1, Math.floor(size * 0.2));
   for (const cell of cells) {
     const x = (cell[0] + offsetX) * size;
     const y = (cell[1] + offsetY) * size;
+    previewCtx.fillStyle = rgb(base);
     previewCtx.fillRect(x, y, size, size);
+    previewCtx.fillStyle = highlight;
+    previewCtx.fillRect(x + pad, y + pad, size - pad * 2, highlightH);
+    previewCtx.fillStyle = shadow;
+    previewCtx.fillRect(x + pad, y + size - shadowH - pad, size - pad * 2, shadowH);
+    previewCtx.strokeStyle = border;
+    previewCtx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
   }
 }
 

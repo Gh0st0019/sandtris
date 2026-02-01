@@ -17,13 +17,13 @@
   --border: #31435e;
   --glow: #ffd9a8;
   --edge: #243249;
-  --board-width: min(68vw, 48vh);
+  --board-width: min(62vw, 44vh);
   --board-bg: #1c2442;
   --board-bg-2: #1a2038;
   --radius-lg: 18px;
   --radius-md: 12px;
   --radius-sm: 8px;
-  --frame-grid: rgba(255, 255, 255, 0.1);
+  --frame-grid: rgba(255, 255, 255, 0.16);
 }
 
 * {
@@ -117,6 +117,11 @@ input {
   transform: translateY(6px);
   pointer-events: none;
   transition: opacity 220ms ease, transform 220ms ease;
+  padding: 10px;
+  background: linear-gradient(180deg, rgba(34, 44, 68, 0.7), rgba(20, 26, 42, 0.9));
+  border: 2px solid var(--edge);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 0 var(--shadow);
 }
 
 .stats--stack {
@@ -321,6 +326,15 @@ input {
   height: 80%;
   image-rendering: pixelated;
   background: transparent;
+}
+
+.tray-slot::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: calc(var(--radius-md) - 6px);
+  pointer-events: none;
 }
 
 .board-frame {
@@ -657,7 +671,7 @@ input {
 
 @media (min-width: 900px) {
   :root {
-    --board-width: min(40vw, 320px, 30vh);
+    --board-width: min(36vw, 300px, 28vh);
   }
 }
 
@@ -674,7 +688,7 @@ input {
     --accent-3: #bdbdbd;
     --text: #f5f3ff;
     --muted: #d3cfff;
-    --board-width: min(72vw, 30vh);
+    --board-width: min(66vw, 28vh);
   }
 
   body {
