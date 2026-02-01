@@ -13,6 +13,7 @@ const leaderboardList = document.getElementById("leaderboard-list");
 const rankValue = document.getElementById("rank-value");
 const rankScore = document.getElementById("rank-score");
 const menuBestEl = document.getElementById("menu-best");
+const matchToastEl = document.getElementById("match-toast");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -40,7 +41,7 @@ const SAND_FALL2_CHANCE = 0.08;
 const LANDING_TIME = 120;
 const LONG_PRESS_MS = 380;
 const DISSOLVE_RATE = 0.2;
-const MATCH_MIN = BLOCK * BLOCK * 8;
+const MATCH_MIN = BLOCK * BLOCK * 9;
 const MATCH_FLASH_TIME = 1600;
 const MATCH_FLASH_INTERVAL = 220;
 const WIND_FACTOR = 0.2;
@@ -357,6 +358,16 @@ function updateMenuStats() {
   renderBestScore();
 }
 
+function showMatchToast(points) {
+  if (!matchToastEl || points <= 0) return;
+  const phrases = ["Nice!", "Good job!", "Well done!", "Great!"];
+  const phrase = phrases[(Math.random() * phrases.length) | 0];
+  matchToastEl.textContent = `${phrase} +${points}`;
+  matchToastEl.classList.remove("match-toast--show");
+  void matchToastEl.offsetWidth;
+  matchToastEl.classList.add("match-toast--show");
+}
+
 function refillBag() {
   bag = Object.keys(PIECE_DEFS);
   for (let i = bag.length - 1; i > 0; i--) {
@@ -526,6 +537,8 @@ function startGame() {
   paused = false;
   gameOver = false;
   dropTimer = 0;
+  loadBestScore();
+  renderBestScore();
   document.body.classList.add("is-playing");
   hideOverlay();
   updateHud();
@@ -853,8 +866,10 @@ function update(dt) {
       matchActive = false;
       matchTimer = 0;
       if (removed > 0) {
-        score += Math.floor(removed / 3);
+        const points = Math.floor(removed / 3);
+        score += points;
         updateHud();
+        showMatchToast(points);
       }
     }
   }
