@@ -3,6 +3,7 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false });
 const nextCanvas = document.getElementById("next");
+const nextCanvasMobile = document.getElementById("next-mobile");
 const holdCanvas = document.getElementById("hold");
 const overlay = document.getElementById("overlay");
 const overlayTitle = document.getElementById("overlay-title");
@@ -16,6 +17,10 @@ const loadingText = document.getElementById("loading-text");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
+const scoreMobileEl = document.getElementById("score-mobile");
+const linesTopEl = document.getElementById("lines-top");
+const linesMobileEl = document.getElementById("lines-mobile");
+const levelMobileEl = document.getElementById("level-mobile");
 const linesEl = document.getElementById("lines");
 const levelEl = document.getElementById("level");
 
@@ -47,8 +52,10 @@ canvas.height = GRID_H;
 ctx.imageSmoothingEnabled = false;
 
 const nextCtx = nextCanvas ? nextCanvas.getContext("2d") : null;
+const nextCtxMobile = nextCanvasMobile ? nextCanvasMobile.getContext("2d") : null;
 const holdCtx = holdCanvas ? holdCanvas.getContext("2d") : null;
 if (nextCtx) nextCtx.imageSmoothingEnabled = false;
+if (nextCtxMobile) nextCtxMobile.imageSmoothingEnabled = false;
 if (holdCtx) holdCtx.imageSmoothingEnabled = false;
 
 const grid = new Uint8Array(GRID_W * GRID_H);
@@ -324,8 +331,12 @@ function updateDropInterval() {
 function updateHud() {
   scoreEl.textContent = score.toString();
   if (scoreTopEl) scoreTopEl.textContent = score.toString();
+  if (scoreMobileEl) scoreMobileEl.textContent = score.toString();
   linesEl.textContent = lines.toString();
+  if (linesTopEl) linesTopEl.textContent = lines.toString();
+  if (linesMobileEl) linesMobileEl.textContent = lines.toString();
   levelEl.textContent = level.toString();
+  if (levelMobileEl) levelMobileEl.textContent = level.toString();
 }
 
 function showMenu() {
@@ -369,6 +380,7 @@ function startGame() {
   piece = spawnPiece(nextType);
   nextType = takeFromBag();
   drawPreview(nextCtx, nextType);
+  drawPreview(nextCtxMobile, nextType);
   drawPreview(holdCtx, holdType);
   pieceState = "active";
   landingTimer = 0;
@@ -496,6 +508,7 @@ function holdPiece() {
   holdUsed = true;
   drawPreview(holdCtx, holdType);
   drawPreview(nextCtx, nextType);
+  drawPreview(nextCtxMobile, nextType);
   if (collides(piece, 0, 0, piece.rot)) {
     endGame();
   }
@@ -530,6 +543,7 @@ function finishDissolve() {
   piece = spawnPiece(nextType);
   nextType = takeFromBag();
   drawPreview(nextCtx, nextType);
+  drawPreview(nextCtxMobile, nextType);
   dropTimer = 0;
   if (collides(piece, 0, 0, piece.rot)) {
     endGame();

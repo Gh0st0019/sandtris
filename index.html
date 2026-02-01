@@ -53,18 +53,21 @@
 
         <section class="board-panel">
           <div class="top-bar">
-            <div class="top-score">
-              <span class="label">Score</span>
-              <span id="score-top">0</span>
+            <div class="hud-row">
+              <button class="hud-icon hud-icon--gear" type="button" aria-label="Settings"></button>
+              <div class="hud-pill">
+                <span class="hud-icon hud-icon--crown" aria-hidden="true"></span>
+                <span id="lines-top">0</span>
+              </div>
+              <div class="hud-pill">
+                <span class="hud-icon hud-icon--coin" aria-hidden="true"></span>
+                <span id="score-top">0</span>
+              </div>
             </div>
-            <div class="top-dots" aria-hidden="true">
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
+            <div class="hud-bar">
+              <span class="hud-left" id="lines-mobile">0</span>
+              <span class="hud-center" id="score-mobile">0</span>
+              <span class="hud-right"><span class="hud-label">LV</span><span id="level-mobile">1</span></span>
             </div>
           </div>
           <div class="board-frame">
@@ -101,6 +104,13 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+          <div class="mobile-tray">
+            <div class="tray-slot"></div>
+            <div class="tray-slot"></div>
+            <div class="tray-slot tray-slot--next">
+              <canvas id="next-mobile" width="72" height="72" aria-label="Next piece"></canvas>
             </div>
           </div>
         </section>
