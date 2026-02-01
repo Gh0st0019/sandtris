@@ -1,0 +1,103 @@
+﻿<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Sandtris</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="loading" id="loading">
+      <div class="loading__content">
+        <video
+          id="loading-video"
+          class="loading__video"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+        >
+          <source src="file:///C:/Users/Marco/Downloads/SAND.mp4" type="video/mp4" />
+        </video>
+        <div class="loading__text" id="loading-text">Accendo la sabbia...</div>
+      </div>
+    </div>
+    <div class="app">
+      <main class="stage">
+        <aside class="side-panel">
+          <div class="stats stats--stack">
+            <div class="stat">
+              <span class="label">Score</span>
+              <span id="score">0</span>
+            </div>
+            <div class="stat">
+              <span class="label">Linee</span>
+              <span id="lines">0</span>
+            </div>
+            <div class="stat">
+              <span class="label">Livello</span>
+              <span id="level">1</span>
+            </div>
+          </div>
+          <div class="leaderboard">
+            <div class="leaderboard-title">Weekly Leaderboard</div>
+            <div class="leaderboard-list" id="leaderboard-list"></div>
+            <div class="leaderboard-rank">
+              <div class="rank-title">Your Rank</div>
+              <div class="rank-value" id="rank-value">-</div>
+              <div class="rank-score" id="rank-score">-</div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="board-panel">
+          <div class="board-frame">
+            <canvas id="game" width="70" height="140" aria-label="Sandtris board"></canvas>
+            <div class="glass"></div>
+            <div class="overlay" id="overlay" data-state="menu">
+              <div class="overlay-card">
+                <div class="overlay-screen overlay-screen--menu">
+                  <div class="menu-kicker">WELCOME TO</div>
+                  <div class="menu-title">SANDTRIS</div>
+                  <div class="menu-sub">Swipe per muovere, tap per ruotare</div>
+                  <div class="menu-sub">Swipe in giu per drop, pressione lunga per hold</div>
+                  <div class="menu-actions">
+                    <button class="menu-btn menu-btn--start" data-menu="start">START</button>
+                    <button class="menu-btn menu-btn--about" data-menu="about">ABOUT</button>
+                  </div>
+                </div>
+                <div class="overlay-screen overlay-screen--about">
+                  <div class="menu-kicker">ABOUT</div>
+                  <p class="menu-text">
+                    Sandtris unisce tetromini e sabbia reale. Ogni blocco si smaterializza in
+                    granuli con un effetto arcade. Pensato per mobile.
+                  </p>
+                  <div class="menu-actions">
+                    <button class="menu-btn menu-btn--start" data-menu="back">BACK</button>
+                  </div>
+                </div>
+                <div class="overlay-screen overlay-screen--message">
+                  <div class="menu-kicker" id="overlay-title">PAUSA</div>
+                  <p class="menu-text" id="overlay-text">Tocca per riprendere</p>
+                  <div class="menu-actions">
+                    <button class="menu-btn menu-btn--start" data-menu="resume">RESUME</button>
+                    <button class="menu-btn menu-btn--about" data-menu="menu">MENU</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <aside class="right-panel">
+          <div class="mini-card">
+            <div class="mini-title">Next</div>
+            <canvas id="next" width="72" height="72"></canvas>
+          </div>
+        </aside>
+      </main>
+    </div>
+    <footer class="credit">Made with ❤️ by Ch3rry</footer>
+    <script src="app.js"></script>
+  </body>
+</html>
