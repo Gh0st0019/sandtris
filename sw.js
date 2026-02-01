@@ -1,14 +1,17 @@
-const CACHE_NAME = "sandtris-v20260201-11";
+const CACHE_NAME = "sandtris-v20260201-12";
 const ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=20260201-11",
-  "./app.js?v=20260201-11",
-  "./manifest.webmanifest?v=20260201-11",
+  "./style.css?v=20260201-12",
+  "./app.js?v=20260201-12",
+  "./manifest.webmanifest?v=20260201-12",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
+  "./assets/maskable-icon.png",
   "./assets/apple-touch-icon.png",
   "./assets/app-icon.png",
+  "./assets/favicon.ico",
+  "./assets/favicon-32.png",
 ];
 
 self.addEventListener("install", (event) => {
