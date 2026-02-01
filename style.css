@@ -502,8 +502,8 @@ input {
 
 .start-sand {
   width: min(88vw, 300px);
-  height: 120px;
-  margin-top: auto;
+  height: 110px;
+  margin-top: 8px;
   border-radius: 14px;
   border: 2px solid #261a5c;
   background: linear-gradient(180deg, rgba(41, 30, 102, 0.65), rgba(20, 12, 54, 0.85));

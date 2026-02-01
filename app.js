@@ -142,7 +142,7 @@ let piece = null;
 let trayPieces = new Array(TRAY_SIZE).fill(null);
 let activeTraySlot = null;
 let dragging = null;
-let dropBoostTimer = 0;
+const FAST_DROP = 0.05;
 let holdType = null;
 let holdUsed = false;
 let pieceState = "idle";
@@ -446,17 +446,17 @@ if (menuSandCanvas && menuSandCtx) {
 }
 
 function spawnMenuSandBurst(width) {
-  const count = 4 + ((Math.random() * 4) | 0);
+  const count = 6 + ((Math.random() * 5) | 0);
   for (let i = 0; i < count; i++) {
     menuSandState.particles.push({
       type: "fall",
       x: randRange(6, width - 6),
-      y: randRange(-20, -4),
-      vx: randRange(-0.03, 0.03),
-      vy: randRange(0.06, 0.14),
-      size: randRange(1.5, 2.6),
-      life: randRange(1200, 2000),
-      ttl: randRange(1200, 2000),
+      y: randRange(-18, -4),
+      vx: randRange(-0.035, 0.035),
+      vy: randRange(0.08, 0.18),
+      size: randRange(1.8, 3.2),
+      life: randRange(1200, 1900),
+      ttl: randRange(1200, 1900),
       tint: randRange(-10, 10),
     });
   }
@@ -481,7 +481,7 @@ function updateMenuSand(dt) {
   }
 
   const floorY = height - 8;
-  const gravity = 0.0016;
+  const gravity = 0.0021;
 
   menuSandCtx.clearRect(0, 0, width, height);
 
@@ -542,6 +542,7 @@ function showMenu() {
   document.body.classList.remove("is-playing");
   renderLeaderboard(loadLeaderboard());
   updateMenuStats();
+  requestAnimationFrame(resizeMenuSand);
 }
 
 function showAbout() {
@@ -583,7 +584,6 @@ function startGame() {
   pieceState = "idle";
   activeTraySlot = null;
   dragging = null;
-  dropBoostTimer = 0;
   initTray();
   drawPreview(nextCtx, trayPieces[0]);
   drawPreview(holdCtx, holdType);
@@ -885,14 +885,10 @@ function update(dt) {
   windPhase += dt * 0.0009;
   wind = Math.sin(windPhase) * WIND_FACTOR;
 
-  if (dropBoostTimer > 0) {
-    dropBoostTimer -= dt;
-  }
-
   if (piece) {
     if (pieceState === "active") {
       dropTimer += dt;
-      const boosted = dropBoostTimer > 0 ? 0.05 : softDropping || touchDropping ? 0.2 : 1;
+      const boosted = FAST_DROP;
       const interval = dropInterval * boosted;
       let safety = 0;
       while (dropTimer >= interval && safety < 120) {
@@ -1232,7 +1228,6 @@ function endTrayDrag(event) {
       pieceState = "active";
       activeTraySlot = dragging.slot;
       dropTimer = 0;
-      dropBoostTimer = 600;
     } else {
       trayPieces[dragging.slot] = dragging.type;
       renderTray();
