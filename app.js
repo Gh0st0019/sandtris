@@ -356,9 +356,13 @@ function updateMenuStats() {
   renderBestScore();
 }
 
-function showMatchToast(points) {
+function showMatchToast(points, xPct, yPct) {
   if (!matchToastEl || points <= 0) return;
   matchToastEl.textContent = `+${points}`;
+  if (Number.isFinite(xPct) && Number.isFinite(yPct)) {
+    matchToastEl.style.left = `${clamp(xPct, 6, 94)}%`;
+    matchToastEl.style.top = `${clamp(yPct, 6, 94)}%`;
+  }
   matchToastEl.classList.remove("match-toast--show");
   void matchToastEl.offsetWidth;
   matchToastEl.classList.add("match-toast--show");
@@ -848,10 +852,14 @@ function update(dt) {
     matchTimer += dt;
     if (matchTimer >= MATCH_FLASH_TIME) {
       let removed = 0;
+      let sumX = 0;
+      let sumY = 0;
       for (let i = 0; i < grid.length; i++) {
         if (matchMask[i]) {
           grid[i] = 0;
           removed += 1;
+          sumX += i % GRID_W;
+          sumY += (i / GRID_W) | 0;
         }
       }
       matchMask.fill(0);
@@ -861,7 +869,9 @@ function update(dt) {
         const points = Math.floor(removed / 3);
         score += points;
         updateHud();
-        showMatchToast(points);
+        const cx = ((sumX / removed) + 0.5) / GRID_W * 100;
+        const cy = ((sumY / removed) + 0.5) / GRID_H * 100;
+        showMatchToast(points, cx, cy);
       }
     }
   }
