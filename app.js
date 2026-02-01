@@ -3,7 +3,8 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d", { alpha: false });
 const nextCanvas = document.getElementById("next");
-const nextCanvasMobile = document.getElementById("next-mobile");
+const traySlots = Array.from(document.querySelectorAll("[data-tray]"));
+const trayCanvases = traySlots.map((slot) => slot.querySelector("canvas"));
 const holdCanvas = document.getElementById("hold");
 const overlay = document.getElementById("overlay");
 const overlayTitle = document.getElementById("overlay-title");
@@ -52,10 +53,12 @@ canvas.height = GRID_H;
 ctx.imageSmoothingEnabled = false;
 
 const nextCtx = nextCanvas ? nextCanvas.getContext("2d") : null;
-const nextCtxMobile = nextCanvasMobile ? nextCanvasMobile.getContext("2d") : null;
+const trayCtxs = trayCanvases.map((canvas) => (canvas ? canvas.getContext("2d") : null));
 const holdCtx = holdCanvas ? holdCanvas.getContext("2d") : null;
 if (nextCtx) nextCtx.imageSmoothingEnabled = false;
-if (nextCtxMobile) nextCtxMobile.imageSmoothingEnabled = false;
+trayCtxs.forEach((ctxRef) => {
+  if (ctxRef) ctxRef.imageSmoothingEnabled = false;
+});
 if (holdCtx) holdCtx.imageSmoothingEnabled = false;
 
 const grid = new Uint8Array(GRID_W * GRID_H);
@@ -130,12 +133,16 @@ function rgb(color) {
   return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
 }
 
+const TRAY_SIZE = 3;
 let bag = [];
 let piece = null;
-let nextType = null;
+let trayPieces = new Array(TRAY_SIZE).fill(null);
+let activeTraySlot = null;
+let dragging = null;
+let dropBoostTimer = 0;
 let holdType = null;
 let holdUsed = false;
-let pieceState = "active";
+let pieceState = "idle";
 let landingTimer = 0;
 let dissolveQueue = [];
 let dissolveIndex = 0;
@@ -314,12 +321,81 @@ function takeFromBag() {
   return bag.pop();
 }
 
+function refillTraySlot(index) {
+  trayPieces[index] = takeFromBag();
+}
+
+function initTray() {
+  for (let i = 0; i < TRAY_SIZE; i++) {
+    refillTraySlot(i);
+  }
+  renderTray();
+}
+
+function renderTray() {
+  trayCtxs.forEach((ctxRef, index) => {
+    drawPreview(ctxRef, trayPieces[index]);
+  });
+  drawPreview(nextCtx, trayPieces[0]);
+}
+
+function getBoardPositionFromClient(type, clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const localX = ((clientX - rect.left) / rect.width) * GRID_W;
+  const localY = ((clientY - rect.top) / rect.height) * GRID_H;
+  const bounds = getPieceBounds(type, 0);
+  let x = localX - bounds.width / 2 - bounds.minX * BLOCK;
+  let y = localY - bounds.height / 2 - bounds.minY * BLOCK;
+  x = Math.round(x / BLOCK) * BLOCK;
+  y = Math.round(y / BLOCK) * BLOCK;
+  const minX = -bounds.minX * BLOCK;
+  const maxX = GRID_W - (bounds.maxX + 1) * BLOCK;
+  const minY = -bounds.minY * BLOCK;
+  const maxY = GRID_H - (bounds.maxY + 1) * BLOCK;
+  return {
+    x: clamp(x, minX, maxX),
+    y: clamp(y, minY, maxY),
+  };
+}
+
 function spawnPiece(type) {
   return {
     type,
     rot: 0,
     x: Math.floor(GRID_W / 2 - 2 * BLOCK),
     y: -2 * BLOCK,
+    color: PIECE_DEFS[type].color,
+  };
+}
+
+function getPieceBounds(type, rot) {
+  const cells = rotations[type][rot];
+  let minX = 4;
+  let minY = 4;
+  let maxX = -1;
+  let maxY = -1;
+  for (const cell of cells) {
+    minX = Math.min(minX, cell[0]);
+    minY = Math.min(minY, cell[1]);
+    maxX = Math.max(maxX, cell[0]);
+    maxY = Math.max(maxY, cell[1]);
+  }
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
+    width: (maxX - minX + 1) * BLOCK,
+    height: (maxY - minY + 1) * BLOCK,
+  };
+}
+
+function spawnPieceAt(type, x, y) {
+  return {
+    type,
+    rot: 0,
+    x,
+    y,
     color: PIECE_DEFS[type].color,
   };
 }
@@ -376,13 +452,14 @@ function startGame() {
   bag = [];
   holdType = null;
   holdUsed = false;
-  nextType = takeFromBag();
-  piece = spawnPiece(nextType);
-  nextType = takeFromBag();
-  drawPreview(nextCtx, nextType);
-  drawPreview(nextCtxMobile, nextType);
+  piece = null;
+  pieceState = "idle";
+  activeTraySlot = null;
+  dragging = null;
+  dropBoostTimer = 0;
+  initTray();
+  drawPreview(nextCtx, trayPieces[0]);
   drawPreview(holdCtx, holdType);
-  pieceState = "active";
   landingTimer = 0;
   dissolveQueue = [];
   dissolveIndex = 0;
@@ -402,6 +479,8 @@ function startGame() {
 function endGame() {
   running = false;
   gameOver = true;
+  dragging = null;
+  activeTraySlot = null;
   if (score > 0) {
     const list = addScoreToLeaderboard(PLAYER_NAME, score);
     renderLeaderboard(list);
@@ -495,23 +574,7 @@ function hardDrop() {
 }
 
 function holdPiece() {
-  if (!piece || holdUsed || pieceState !== "active") return;
-  const current = piece.type;
-  if (!holdType) {
-    holdType = current;
-    piece = spawnPiece(nextType);
-    nextType = takeFromBag();
-  } else {
-    piece = spawnPiece(holdType);
-    holdType = current;
-  }
-  holdUsed = true;
-  drawPreview(holdCtx, holdType);
-  drawPreview(nextCtx, nextType);
-  drawPreview(nextCtxMobile, nextType);
-  if (collides(piece, 0, 0, piece.rot)) {
-    endGame();
-  }
+  return;
 }
 
 function startLanding() {
@@ -538,15 +601,15 @@ function startDissolve() {
 }
 
 function finishDissolve() {
-  pieceState = "active";
+  pieceState = "idle";
   holdUsed = false;
-  piece = spawnPiece(nextType);
-  nextType = takeFromBag();
-  drawPreview(nextCtx, nextType);
-  drawPreview(nextCtxMobile, nextType);
+  piece = null;
   dropTimer = 0;
-  if (collides(piece, 0, 0, piece.rot)) {
-    endGame();
+  if (activeTraySlot !== null) {
+    refillTraySlot(activeTraySlot);
+    renderTray();
+    drawPreview(nextCtx, trayPieces[0]);
+    activeTraySlot = null;
   }
   updateHud();
 }
@@ -576,6 +639,7 @@ function clearRows() {
 
 function updatePieceMask() {
   pieceMask.fill(0);
+  if (!piece) return;
   if (pieceState === "active" || pieceState === "landing") {
     forEachPiecePixel(piece, piece.rot, piece.x, piece.y, (gx, gy) => {
       pieceMask[gy * GRID_W + gx] = 1;
@@ -691,26 +755,32 @@ function updateDissolve(dt) {
 }
 
 function update(dt) {
-  if (!piece) return;
   windPhase += dt * 0.0009;
   wind = Math.sin(windPhase) * WIND_FACTOR;
 
-  if (pieceState === "active") {
-    dropTimer += dt;
-    const interval = softDropping || touchDropping ? dropInterval * 0.2 : dropInterval;
-    while (dropTimer >= interval) {
-      dropTimer -= interval;
-      if (!tryMove(0, 1)) {
-        break;
+  if (dropBoostTimer > 0) {
+    dropBoostTimer -= dt;
+  }
+
+  if (piece) {
+    if (pieceState === "active") {
+      dropTimer += dt;
+      const boosted = dropBoostTimer > 0 ? 0.12 : softDropping || touchDropping ? 0.2 : 1;
+      const interval = dropInterval * boosted;
+      while (dropTimer >= interval) {
+        dropTimer -= interval;
+        if (!tryMove(0, 1)) {
+          break;
+        }
       }
+      if (collides(piece, 0, 1, piece.rot)) {
+        startLanding();
+      }
+    } else if (pieceState === "landing") {
+      updateLanding(dt);
+    } else if (pieceState === "dissolving") {
+      updateDissolve(dt);
     }
-    if (collides(piece, 0, 1, piece.rot)) {
-      startLanding();
-    }
-  } else if (pieceState === "landing") {
-    updateLanding(dt);
-  } else if (pieceState === "dissolving") {
-    updateDissolve(dt);
   }
 
   updatePieceMask();
@@ -815,6 +885,10 @@ function render() {
     const offsetY = pieceState === "landing" && landingTimer < 220 ? 1 : 0;
     const flashing = pieceState === "landing";
     renderPiece(color, offsetY, flashing);
+  }
+
+  if (dragging && dragging.inside) {
+    renderGhostPiece(dragging.type, dragging.x, dragging.y);
   }
 
   ctx.putImageData(imageData, 0, 0);
@@ -934,6 +1008,21 @@ document.querySelectorAll("[data-menu]").forEach((btn) => {
   });
 });
 
+traySlots.forEach((slot, index) => {
+  slot.addEventListener("pointerdown", (e) => {
+    startTrayDrag(index, e);
+  });
+  slot.addEventListener("pointermove", (e) => {
+    updateTrayDrag(e);
+  });
+  slot.addEventListener("pointerup", (e) => {
+    endTrayDrag(e);
+  });
+  slot.addEventListener("pointercancel", (e) => {
+    endTrayDrag(e);
+  });
+});
+
 let touch = null;
 let holdTimer = null;
 
@@ -941,7 +1030,87 @@ function getCellSize() {
   return canvas.clientWidth / GRID_COLS;
 }
 
+function getBoardRect() {
+  return canvas.getBoundingClientRect();
+}
+
+function isInsideBoard(clientX, clientY) {
+  const rect = getBoardRect();
+  return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+}
+
+function renderGhostPiece(type, x, y) {
+  const ghostColor = PALETTE[PIECE_DEFS[type].color];
+  const blend = 0.55;
+  forEachPiecePixel({ type }, 0, x, y, (gx, gy) => {
+    const idx = (gy * GRID_W + gx) * 4;
+    ctxData[idx] = clamp(ctxData[idx] * (1 - blend) + ghostColor[0] * blend, 0, 255);
+    ctxData[idx + 1] = clamp(ctxData[idx + 1] * (1 - blend) + ghostColor[1] * blend, 0, 255);
+    ctxData[idx + 2] = clamp(ctxData[idx + 2] * (1 - blend) + ghostColor[2] * blend, 0, 255);
+    ctxData[idx + 3] = 255;
+  });
+}
+
+function startTrayDrag(index, event) {
+  if (!running || paused || gameOver || piece || dragging) return;
+  const type = trayPieces[index];
+  if (!type) return;
+  dragging = {
+    slot: index,
+    type,
+    pointerId: event.pointerId,
+    x: 0,
+    y: 0,
+    inside: false,
+  };
+  trayPieces[index] = null;
+  renderTray();
+  updateTrayDrag(event);
+  traySlots[index].setPointerCapture(event.pointerId);
+}
+
+function updateTrayDrag(event) {
+  if (!dragging || event.pointerId !== dragging.pointerId) return;
+  dragging.inside = isInsideBoard(event.clientX, event.clientY);
+  const pos = getBoardPositionFromClient(dragging.type, event.clientX, event.clientY);
+  dragging.x = pos.x;
+  dragging.y = pos.y;
+}
+
+function endTrayDrag(event) {
+  if (!dragging || event.pointerId !== dragging.pointerId) return;
+  const releasedInside = dragging.inside && isInsideBoard(event.clientX, event.clientY);
+  if (releasedInside) {
+    const pos = getBoardPositionFromClient(dragging.type, event.clientX, event.clientY);
+    const candidate = spawnPieceAt(dragging.type, pos.x, pos.y);
+    const bounds = getPieceBounds(dragging.type, 0);
+    const minY = -bounds.minY * BLOCK;
+    let placed = candidate;
+    let tries = 0;
+    while (tries < 6 && collides(placed, 0, 0, placed.rot)) {
+      placed.y -= BLOCK;
+      if (placed.y < minY) break;
+      tries += 1;
+    }
+    if (!collides(placed, 0, 0, placed.rot)) {
+      piece = placed;
+      pieceState = "active";
+      activeTraySlot = dragging.slot;
+      dropTimer = 0;
+      dropBoostTimer = 600;
+    } else {
+      trayPieces[dragging.slot] = dragging.type;
+      renderTray();
+    }
+  } else {
+    trayPieces[dragging.slot] = dragging.type;
+    renderTray();
+  }
+  dragging = null;
+}
+
 canvas.addEventListener("pointerdown", (e) => {
+  if (dragging) return;
   if (!running || paused || gameOver || pieceState !== "active") return;
   touch = {
     id: e.pointerId,
@@ -969,6 +1138,7 @@ canvas.addEventListener("pointerdown", (e) => {
 });
 
 canvas.addEventListener("pointermove", (e) => {
+  if (dragging) return;
   if (!touch || e.pointerId !== touch.id) return;
   const totalDx = e.clientX - touch.originX;
   const totalDy = e.clientY - touch.originY;
@@ -1011,6 +1181,7 @@ canvas.addEventListener("pointermove", (e) => {
 });
 
 canvas.addEventListener("pointerup", (e) => {
+  if (dragging) return;
   if (!touch || e.pointerId !== touch.id) return;
   if (holdTimer) {
     clearTimeout(holdTimer);
@@ -1031,6 +1202,7 @@ canvas.addEventListener("pointerup", (e) => {
 });
 
 canvas.addEventListener("pointercancel", () => {
+  if (dragging) return;
   if (holdTimer) {
     clearTimeout(holdTimer);
     holdTimer = null;

@@ -107,11 +107,15 @@
             </div>
           </div>
           <div class="mobile-tray">
-            <div class="tray-slot"></div>
-            <div class="tray-slot"></div>
-            <div class="tray-slot tray-slot--next">
-              <canvas id="next-mobile" width="72" height="72" aria-label="Next piece"></canvas>
-            </div>
+            <button class="tray-slot" type="button" data-tray="0">
+              <canvas id="tray-0" width="72" height="72" aria-label="Piece 1"></canvas>
+            </button>
+            <button class="tray-slot" type="button" data-tray="1">
+              <canvas id="tray-1" width="72" height="72" aria-label="Piece 2"></canvas>
+            </button>
+            <button class="tray-slot tray-slot--next" type="button" data-tray="2">
+              <canvas id="tray-2" width="72" height="72" aria-label="Piece 3"></canvas>
+            </button>
           </div>
         </section>
         <aside class="right-panel">

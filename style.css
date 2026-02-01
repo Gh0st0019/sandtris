@@ -325,6 +325,9 @@ input {
   box-shadow: 0 6px 0 #120b2c;
   display: grid;
   place-items: center;
+  padding: 0;
+  cursor: pointer;
+  touch-action: none;
 }
 
 .tray-slot canvas {
@@ -688,6 +691,7 @@ input {
   .app {
     padding: 10px 12px 14px;
     width: 100%;
+    height: 100dvh;
   }
 
   .menu-actions {
@@ -749,7 +753,7 @@ input {
     gap: 10px;
   }
 
-  .top-bar {
+  .is-playing .top-bar {
     display: grid;
   }
 
@@ -769,7 +773,7 @@ input {
     font-size: 18px;
   }
 
-  .mobile-tray {
+  .is-playing .mobile-tray {
     display: grid;
   }
 
