@@ -871,12 +871,14 @@ function update(dt) {
       matchActive = false;
       matchTimer = 0;
       if (removed > 0) {
-        const points = Math.floor(removed / 3);
-        score += points;
-        updateHud();
-        const cx = ((sumX / removed) + 0.5) / GRID_W * 100;
-        const cy = ((sumY / removed) + 0.5) / GRID_H * 100;
-        showMatchToast(points, cx, cy);
+        if (removed >= MATCH_MIN) {
+          const points = Math.floor(removed / 3);
+          score += points;
+          updateHud();
+          const cx = ((sumX / removed) + 0.5) / GRID_W * 100;
+          const cy = ((sumY / removed) + 0.5) / GRID_H * 100;
+          showMatchToast(points, cx, cy);
+        }
       }
     }
   }
