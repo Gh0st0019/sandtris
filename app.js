@@ -629,13 +629,9 @@ function tryRotate(dir) {
 
 function hardDrop() {
   if (!piece || pieceState !== "active") return;
-  let movedSteps = 0;
   while (!collides(piece, 0, 1, piece.rot)) {
     piece.y += 1;
-    movedSteps += 1;
   }
-  score += movedSteps * 2;
-  updateHud();
   startLanding();
 }
 
@@ -813,10 +809,19 @@ function updateDissolve(dt) {
   }
   if (dissolveIndex >= dissolveQueue.length) {
     dissolveMask.fill(0);
-    score += 10;
     finishDissolve();
     triggerMatchScan();
   }
+}
+
+function isOverflowed() {
+  for (let y = 0; y < BLOCK; y++) {
+    const rowStart = y * GRID_W;
+    for (let x = 0; x < GRID_W; x++) {
+      if (grid[rowStart + x]) return true;
+    }
+  }
+  return false;
 }
 
 function update(dt) {
@@ -877,11 +882,19 @@ function update(dt) {
   }
 
   if (!matchActive) {
-    for (let i = 0; i < SAND_STEPS; i++) {
-      stepSand();
+    if (!triggerMatchScan()) {
+      for (let i = 0; i < SAND_STEPS; i++) {
+        stepSand();
+        if (triggerMatchScan()) break;
+      }
     }
+  } else {
+    triggerMatchScan();
   }
-  triggerMatchScan();
+
+  if (!gameOver && !matchActive && isOverflowed()) {
+    endGame();
+  }
 }
 
 function renderPiece(color, offsetY, flashing) {

@@ -1,10 +1,10 @@
-const CACHE_NAME = "sandtris-v20260201-22";
+const CACHE_NAME = "sandtris-v20260201-23";
 const ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=20260201-22",
-  "./app.js?v=20260201-22",
-  "./manifest.webmanifest?v=20260201-22",
+  "./style.css?v=20260201-23",
+  "./app.js?v=20260201-23",
+  "./manifest.webmanifest?v=20260201-23",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
   "./assets/maskable-icon.png",
