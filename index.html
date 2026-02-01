@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Sandtris</title>
-    <link rel="stylesheet" href="style.css?v=20260201-4" />
+    <link rel="stylesheet" href="style.css?v=20260201-5" />
   </head>
   <body>
     <div class="app">
@@ -58,17 +58,29 @@
             <canvas id="game" width="70" height="140" aria-label="Sandtris board"></canvas>
             <div class="glass"></div>
             <div class="overlay" id="overlay" data-state="menu">
-              <div class="overlay-card">
-                <div class="overlay-screen overlay-screen--menu">
-                  <div class="menu-kicker">WELCOME TO</div>
-                  <div class="menu-title">SANDTRIS</div>
-                  <div class="menu-sub">Swipe per muovere, tap per ruotare</div>
-                  <div class="menu-sub">Swipe in giu per drop, pressione lunga per hold</div>
-                  <div class="menu-actions">
-                    <button class="menu-btn menu-btn--start" data-menu="start">START</button>
-                    <button class="menu-btn menu-btn--about" data-menu="about">ABOUT</button>
+              <div class="overlay-screen overlay-screen--menu">
+                <div class="start-screen">
+                  <div class="start-topbar">
+                    <button class="start-gear" type="button" aria-label="Settings"></button>
+                    <div class="start-coins">
+                      <span class="start-coin-icon" aria-hidden="true"></span>
+                      <span id="menu-coins">0</span>
+                    </div>
                   </div>
+                  <div class="start-logo">SANDTRIS</div>
+                  <div class="start-crown">
+                    <span class="start-crown-icon" aria-hidden="true"></span>
+                    <span id="menu-best">0</span>
+                  </div>
+                  <button class="start-mode" type="button" disabled>
+                    <span class="start-lock" aria-hidden="true"></span>
+                    <span class="start-mode-kicker">COMING SOON</span>
+                    <span class="start-mode-title">SURVIVAL</span>
+                  </button>
+                  <button class="start-play" data-menu="start">PLAY</button>
                 </div>
+              </div>
+              <div class="overlay-card">
                 <div class="overlay-screen overlay-screen--about">
                   <div class="menu-kicker">ABOUT</div>
                   <p class="menu-text">
@@ -111,6 +123,6 @@
       </main>
     </div>
     <footer class="credit">Made with ❤️ by Ch3rry</footer>
-    <script src="app.js?v=20260201-4"></script>
+    <script src="app.js?v=20260201-5"></script>
   </body>
 </html>

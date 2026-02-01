@@ -12,6 +12,8 @@ const overlayText = document.getElementById("overlay-text");
 const leaderboardList = document.getElementById("leaderboard-list");
 const rankValue = document.getElementById("rank-value");
 const rankScore = document.getElementById("rank-score");
+const menuCoinsEl = document.getElementById("menu-coins");
+const menuBestEl = document.getElementById("menu-best");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -302,6 +304,13 @@ function triggerMatchScan() {
   return true;
 }
 
+function updateMenuStats() {
+  const list = loadLeaderboard();
+  const best = list.length ? list[0].score : 0;
+  if (menuCoinsEl) menuCoinsEl.textContent = `${best}`;
+  if (menuBestEl) menuBestEl.textContent = `${best}`;
+}
+
 function refillBag() {
   bag = Object.keys(PIECE_DEFS);
   for (let i = bag.length - 1; i > 0; i--) {
@@ -414,6 +423,7 @@ function showMenu() {
   overlay.classList.remove("hidden");
   document.body.classList.remove("is-playing");
   renderLeaderboard(loadLeaderboard());
+  updateMenuStats();
 }
 
 function showAbout() {
