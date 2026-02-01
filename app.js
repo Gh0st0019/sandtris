@@ -429,6 +429,11 @@ function showAbout() {
   overlay.classList.remove("hidden");
 }
 
+function showSettings() {
+  overlay.dataset.state = "settings";
+  overlay.classList.remove("hidden");
+}
+
 function showMessage(title, text) {
   overlayTitle.textContent = title;
   overlayText.textContent = text;
@@ -993,6 +998,9 @@ document.querySelectorAll("[data-menu]").forEach((btn) => {
     switch (action) {
       case "start":
         startGame();
+        break;
+      case "settings":
+        showSettings();
         break;
       case "about":
         showAbout();

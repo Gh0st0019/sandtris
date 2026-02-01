@@ -4,7 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Sandtris</title>
-    <link rel="stylesheet" href="style.css?v=20260201-8" />
+    <link rel="icon" href="assets/app-icon.png" />
+    <link rel="apple-touch-icon" href="assets/app-icon.png" />
+    <link rel="stylesheet" href="style.css?v=20260201-10" />
   </head>
   <body>
     <div class="app">
@@ -63,12 +65,24 @@
                   <div class="start-logo">SANDTRIS</div>
                   <div class="start-crown">
                     <span class="start-crown-icon" aria-hidden="true"></span>
+                    <span class="start-best-label">BEST</span>
                     <span id="menu-best">0</span>
                   </div>
                   <button class="start-play" data-menu="start">PLAY</button>
+                  <div class="start-actions">
+                    <button class="start-secondary" data-menu="settings">SETTINGS</button>
+                    <button class="start-secondary" data-menu="about">ABOUT</button>
+                  </div>
                 </div>
               </div>
               <div class="overlay-card">
+                <div class="overlay-screen overlay-screen--settings">
+                  <div class="menu-kicker">SETTINGS</div>
+                  <p class="menu-text">Nuove opzioni in arrivo.</p>
+                  <div class="menu-actions">
+                    <button class="menu-btn menu-btn--start" data-menu="back">BACK</button>
+                  </div>
+                </div>
                 <div class="overlay-screen overlay-screen--about">
                   <div class="menu-kicker">ABOUT</div>
                   <p class="menu-text">
@@ -111,6 +125,6 @@
       </main>
     </div>
     <footer class="credit">Made with ❤️ by Ch3rry</footer>
-    <script src="app.js?v=20260201-8"></script>
+    <script src="app.js?v=20260201-10"></script>
   </body>
 </html>
