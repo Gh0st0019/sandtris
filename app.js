@@ -15,7 +15,6 @@ const loadingVideo = document.getElementById("loading-video");
 const loadingText = document.getElementById("loading-text");
 
 const scoreEl = document.getElementById("score");
-const scoreTopEl = document.getElementById("score-top");
 const linesEl = document.getElementById("lines");
 const levelEl = document.getElementById("level");
 
@@ -205,14 +204,15 @@ function addScoreToLeaderboard(name, value) {
 }
 
 function renderLeaderboard(list) {
+  if (!leaderboardList) return;
   leaderboardList.innerHTML = "";
   if (!list.length) {
     const empty = document.createElement("div");
     empty.className = "leaderboard-empty";
     empty.textContent = "Nessun punteggio";
     leaderboardList.appendChild(empty);
-    rankValue.textContent = "-";
-    rankScore.textContent = "-";
+    if (rankValue) rankValue.textContent = "-";
+    if (rankScore) rankScore.textContent = "-";
     return;
   }
   list.forEach((entry, index) => {
@@ -222,12 +222,14 @@ function renderLeaderboard(list) {
     leaderboardList.appendChild(row);
   });
   const rankIndex = list.findIndex((entry) => entry.name === PLAYER_NAME);
-  if (rankIndex >= 0) {
-    rankValue.textContent = `${rankIndex + 1}`;
-    rankScore.textContent = `${list[rankIndex].score}`;
-  } else {
-    rankValue.textContent = "-";
-    rankScore.textContent = "-";
+  if (rankValue && rankScore) {
+    if (rankIndex >= 0) {
+      rankValue.textContent = `${rankIndex + 1}`;
+      rankScore.textContent = `${list[rankIndex].score}`;
+    } else {
+      rankValue.textContent = "-";
+      rankScore.textContent = "-";
+    }
   }
 }
 
@@ -323,7 +325,6 @@ function updateDropInterval() {
 
 function updateHud() {
   scoreEl.textContent = score.toString();
-  if (scoreTopEl) scoreTopEl.textContent = score.toString();
   linesEl.textContent = lines.toString();
   levelEl.textContent = level.toString();
 }
@@ -332,7 +333,9 @@ function showMenu() {
   overlay.dataset.state = "menu";
   overlay.classList.remove("hidden");
   document.body.classList.remove("is-playing");
-  renderLeaderboard(loadLeaderboard());
+  if (leaderboardList) {
+    renderLeaderboard(loadLeaderboard());
+  }
 }
 
 function showAbout() {
@@ -392,7 +395,9 @@ function endGame() {
   gameOver = true;
   if (score > 0) {
     const list = addScoreToLeaderboard(PLAYER_NAME, score);
-    renderLeaderboard(list);
+    if (leaderboardList) {
+      renderLeaderboard(list);
+    }
   }
   showMessage("GAME OVER", "Tocca START o tap per ricominciare");
 }
