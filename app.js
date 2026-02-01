@@ -17,7 +17,7 @@ const menuBestEl = document.getElementById("menu-best");
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
 const scoreMobileEl = document.getElementById("score-mobile");
-const linesTopEl = document.getElementById("lines-top");
+const bestTopEl = document.getElementById("best-top");
 const linesMobileEl = document.getElementById("lines-mobile");
 const levelMobileEl = document.getElementById("level-mobile");
 const linesEl = document.getElementById("lines");
@@ -40,7 +40,7 @@ const SAND_FALL2_CHANCE = 0.08;
 const LANDING_TIME = 120;
 const LONG_PRESS_MS = 380;
 const DISSOLVE_RATE = 0.2;
-const MATCH_MIN = BLOCK * BLOCK * 7;
+const MATCH_MIN = BLOCK * BLOCK * 8;
 const MATCH_FLASH_TIME = 1600;
 const MATCH_FLASH_INTERVAL = 220;
 const WIND_FACTOR = 0.2;
@@ -167,8 +167,29 @@ let frame = 0;
 
 const imageData = ctx.createImageData(GRID_W, GRID_H);
 
+const BEST_SCORE_KEY = "sandtris_best_v1";
 const LEADERBOARD_KEY_PREFIX = "sandtris_weekly_v1";
 const PLAYER_NAME = "YOU";
+let bestScore = 0;
+
+function loadBestScore() {
+  const raw = localStorage.getItem(BEST_SCORE_KEY);
+  const value = Number(raw);
+  bestScore = Number.isFinite(value) ? value : 0;
+  return bestScore;
+}
+
+function updateBestScore(value) {
+  if (value > bestScore) {
+    bestScore = value;
+    localStorage.setItem(BEST_SCORE_KEY, String(bestScore));
+  }
+}
+
+function renderBestScore() {
+  if (menuBestEl) menuBestEl.textContent = `${bestScore}`;
+  if (bestTopEl) bestTopEl.textContent = `${bestScore}`;
+}
 
 function getISOWeekKey(date) {
   const tmp = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -332,9 +353,8 @@ function triggerMatchScan() {
 }
 
 function updateMenuStats() {
-  const list = loadLeaderboard();
-  const best = list.length ? list[0].score : 0;
-  if (menuBestEl) menuBestEl.textContent = `${best}`;
+  loadBestScore();
+  renderBestScore();
 }
 
 function refillBag() {
@@ -438,10 +458,11 @@ function updateHud() {
   if (scoreTopEl) scoreTopEl.textContent = score.toString();
   if (scoreMobileEl) scoreMobileEl.textContent = score.toString();
   linesEl.textContent = lines.toString();
-  if (linesTopEl) linesTopEl.textContent = lines.toString();
   if (linesMobileEl) linesMobileEl.textContent = lines.toString();
   levelEl.textContent = level.toString();
   if (levelMobileEl) levelMobileEl.textContent = level.toString();
+  updateBestScore(score);
+  renderBestScore();
 }
 
 
@@ -519,6 +540,8 @@ function endGame() {
     const list = addScoreToLeaderboard(PLAYER_NAME, score);
     renderLeaderboard(list);
   }
+  updateBestScore(score);
+  renderBestScore();
   showMessage("GAME OVER", "Tocca START o tap per ricominciare");
 }
 

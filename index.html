@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Sandtris</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260201-17" />
+    <link rel="manifest" href="manifest.webmanifest?v=20260201-18" />
     <meta name="theme-color" content="#4b34b9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
-    <link rel="stylesheet" href="style.css?v=20260201-17" />
+    <link rel="stylesheet" href="style.css?v=20260201-18" />
   </head>
   <body>
     <div class="app">
@@ -51,7 +51,8 @@
               <button class="hud-icon hud-icon--gear" type="button" aria-label="Settings"></button>
               <div class="hud-pill">
                 <span class="hud-icon hud-icon--crown" aria-hidden="true"></span>
-                <span id="lines-top">0</span>
+                <span class="hud-label">Best</span>
+                <span id="best-top">0</span>
               </div>
               <div class="hud-pill">
                 <span class="hud-icon hud-icon--coin" aria-hidden="true"></span>
@@ -80,6 +81,14 @@
                   <div class="start-actions">
                     <button class="start-secondary" data-menu="settings">SETTINGS</button>
                     <button class="start-secondary" data-menu="about">ABOUT</button>
+                  </div>
+                  <div class="start-tutorial">
+                    <div class="start-tutorial-title">TUTORIAL</div>
+                    <ul>
+                      <li>Trascina un blocco nel tabellone.</li>
+                      <li>Tocca per ruotare, scorri per muovere.</li>
+                      <li>Unisci gruppi grandi dello stesso colore.</li>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -133,6 +142,6 @@
       </main>
     </div>
     <footer class="credit">Made with ❤️ by Ch3rry</footer>
-    <script src="app.js?v=20260201-17"></script>
+    <script src="app.js?v=20260201-18"></script>
   </body>
 </html>
