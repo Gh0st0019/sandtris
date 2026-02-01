@@ -229,7 +229,7 @@ input {
   border: 3px solid #1b103d;
   box-shadow: 0 6px 0 #120b2c;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 1px;
 }
 
@@ -618,7 +618,7 @@ input {
   left: 12px;
   bottom: 10px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--muted);
@@ -673,7 +673,7 @@ input {
     --accent-3: #bdbdbd;
     --text: #f5f3ff;
     --muted: #d3cfff;
-    --board-width: min(90vw, 36vh);
+    --board-width: min(86vw, 34vh);
   }
 
   body {
@@ -773,8 +773,13 @@ input {
     font-size: 18px;
   }
 
+  .hud-left {
+    font-size: 20px;
+  }
+
   .is-playing .mobile-tray {
     display: grid;
+    margin-top: -6px;
   }
 
   .board-frame {

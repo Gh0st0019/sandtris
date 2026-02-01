@@ -39,7 +39,7 @@ const SAND_STEPS = window.innerWidth < 520 ? 2 : 3;
 const SAND_SLIDE_CHANCE = 0.008;
 const SAND_FALL2_CHANCE = 0.08;
 
-const LANDING_TIME = 1000;
+const LANDING_TIME = 120;
 const LONG_PRESS_MS = 380;
 const DISSOLVE_RATE = 0.2;
 const MATCH_MIN = BLOCK * BLOCK * 7;
@@ -580,6 +580,7 @@ function holdPiece() {
 function startLanding() {
   pieceState = "landing";
   landingTimer = 0;
+  startDissolve();
 }
 
 function startDissolve() {
@@ -730,9 +731,6 @@ function moveSandCell(x, y, bias) {
 
 function updateLanding(dt) {
   landingTimer += dt;
-  if (landingTimer >= LANDING_TIME) {
-    startDissolve();
-  }
 }
 
 function updateDissolve(dt) {
@@ -765,13 +763,15 @@ function update(dt) {
   if (piece) {
     if (pieceState === "active") {
       dropTimer += dt;
-      const boosted = dropBoostTimer > 0 ? 0.12 : softDropping || touchDropping ? 0.2 : 1;
+      const boosted = dropBoostTimer > 0 ? 0.05 : softDropping || touchDropping ? 0.2 : 1;
       const interval = dropInterval * boosted;
-      while (dropTimer >= interval) {
+      let safety = 0;
+      while (dropTimer >= interval && safety < 120) {
         dropTimer -= interval;
         if (!tryMove(0, 1)) {
           break;
         }
+        safety += 1;
       }
       if (collides(piece, 0, 1, piece.rot)) {
         startLanding();
