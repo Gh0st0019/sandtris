@@ -302,10 +302,6 @@ input {
   box-shadow: inset 0 0 0 2px #b6781d;
 }
 
-.is-playing .top-bar {
-  display: grid;
-}
-
 .mobile-tray {
   display: none;
   width: 100%;
@@ -509,29 +505,6 @@ input {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-}
-
-.match-toast {
-  position: absolute;
-  left: 50%;
-  top: 20%;
-  transform: translate(-50%, -10px) scale(0.96);
-  padding: 8px 12px;
-  border: 3px solid #1b103d;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #ffd666, #f0b24d);
-  color: #2a1b66;
-  font-family: var(--font-display);
-  font-size: 11px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  box-shadow: 0 6px 0 #b6781d;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.match-toast--show {
-  animation: toast-pop 900ms ease forwards;
 }
 
 .start-tutorial {
@@ -857,25 +830,6 @@ input {
   }
   100% {
     transform: translate(-6px, 0);
-  }
-}
-
-@keyframes toast-pop {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -14px) scale(0.92);
-  }
-  15% {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1);
-  }
-  75% {
-    opacity: 1;
-    transform: translate(-50%, 4px) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, 10px) scale(0.98);
   }
 }
 
