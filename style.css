@@ -17,9 +17,13 @@
   --border: #31435e;
   --glow: #ffd9a8;
   --edge: #243249;
-  --board-width: min(72vw, 52vh);
+  --board-width: min(68vw, 48vh);
   --board-bg: #1c2442;
   --board-bg-2: #1a2038;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --frame-grid: rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -76,47 +80,6 @@ body::after {
   z-index: 0;
 }
 
-.loading {
-  position: fixed;
-  inset: 0;
-  background: #000;
-  display: grid;
-  place-items: center;
-  z-index: 10;
-}
-
-.loading--done {
-  opacity: 0;
-  transition: opacity 320ms ease;
-}
-
-.loading__content {
-  display: grid;
-  gap: 16px;
-  place-items: center;
-  width: auto;
-  height: auto;
-}
-
-.loading__video {
-  width: min(70vw, 460px);
-  height: min(70vh, 520px);
-  object-fit: cover;
-  border: 4px solid var(--accent);
-  box-shadow: 0 8px 0 var(--shadow), 0 0 16px rgba(242, 197, 124, 0.25);
-  display: block;
-}
-
-.loading__text {
-  font-family: var(--font-display);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--muted);
-  text-align: center;
-  min-height: 18px;
-}
-
 button,
 input {
   font-family: var(--font-display);
@@ -149,7 +112,7 @@ input {
 
 .stats {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   opacity: 0;
   transform: translateY(6px);
   pointer-events: none;
@@ -161,27 +124,40 @@ input {
 }
 
 .stat {
-  background: linear-gradient(180deg, #202a3f, #151e2f);
-  border: 2px solid var(--border);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-  padding: 5px 7px;
+  position: relative;
+  background: linear-gradient(180deg, #273552, #151c2d);
+  border: 2px solid var(--edge);
+  border-radius: var(--radius-md);
+  box-shadow: 0 6px 0 var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  padding: 8px 10px;
   display: grid;
   gap: 4px;
   text-align: center;
   font-size: 14px;
+  overflow: hidden;
+}
+
+.stat::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0.85;
 }
 
 .label {
-  font-size: 9px;
+  font-size: 8px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--muted);
 }
 
 .stat span:not(.label) {
-  font-size: 18px;
-  letter-spacing: 1px;
+  font-size: 20px;
+  letter-spacing: 1.5px;
   color: var(--text);
+  text-shadow: 0 2px 0 rgba(7, 9, 17, 0.65);
 }
 
 .stage {
@@ -227,6 +203,7 @@ input {
   padding: 6px 10px;
   background: linear-gradient(180deg, #20144c, #160f36);
   border: 3px solid #1b103d;
+  border-radius: var(--radius-sm);
   box-shadow: 0 6px 0 #120b2c;
   font-family: var(--font-display);
   font-size: 11px;
@@ -242,6 +219,7 @@ input {
   padding: 6px 10px;
   background: linear-gradient(180deg, #20144c, #160f36);
   border: 3px solid #1b103d;
+  border-radius: var(--radius-sm);
   box-shadow: 0 6px 0 #120b2c;
   font-family: var(--font-display);
   text-transform: uppercase;
@@ -278,6 +256,7 @@ input {
   background: #2b1a6a;
   box-shadow: 0 4px 0 #120b2c;
   position: relative;
+  border-radius: 6px;
 }
 
 .hud-icon--gear {
@@ -321,26 +300,34 @@ input {
 .tray-slot {
   aspect-ratio: 1 / 1;
   border: 3px solid #1b103d;
-  background: linear-gradient(180deg, #20144c, #160f36);
+  background-image:
+    linear-gradient(var(--frame-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--frame-grid) 1px, transparent 1px),
+    linear-gradient(180deg, #20144c, #160f36);
+  background-size: 25% 25%, 25% 25%, 100% 100%;
+  background-position: -1px -1px, -1px -1px, 0 0;
   box-shadow: 0 6px 0 #120b2c;
   display: grid;
   place-items: center;
   padding: 0;
   cursor: pointer;
   touch-action: none;
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
 .tray-slot canvas {
   width: 80%;
   height: 80%;
   image-rendering: pixelated;
+  background: transparent;
 }
 
 .board-frame {
   position: relative;
   width: var(--board-width);
   aspect-ratio: 10 / 20;
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
   border: 4px solid var(--border);
   background: linear-gradient(180deg, #1f2946 0%, #141a2c 100%);
   box-shadow: 0 12px 0 var(--shadow), 0 0 22px rgba(60, 90, 140, 0.28);
@@ -351,6 +338,7 @@ input {
   content: "";
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   border: 2px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   pointer-events: none;
@@ -405,6 +393,7 @@ input {
   display: grid;
   gap: 12px;
   width: min(84vw, 360px);
+  border-radius: var(--radius-lg);
 }
 
 .overlay-screen {
@@ -463,6 +452,7 @@ input {
   text-transform: uppercase;
   letter-spacing: 2px;
   box-shadow: 0 6px 0 var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
 }
 
 .menu-btn--start {
@@ -514,6 +504,7 @@ input {
   gap: 8px;
   text-align: center;
   width: min(140px, 90%);
+  border-radius: var(--radius-md);
 }
 
 .mini-title {
@@ -527,9 +518,15 @@ input {
   width: 100%;
   height: auto;
   image-rendering: pixelated;
-  background: #1b2438;
+  background-color: #1b2438;
+  background-image:
+    linear-gradient(var(--frame-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--frame-grid) 1px, transparent 1px);
+  background-size: 25% 25%;
+  background-position: -1px -1px;
   border: 2px solid #2a3a52;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
 }
 
 .spacer {
@@ -539,10 +536,11 @@ input {
 .leaderboard {
   background: linear-gradient(180deg, #202a3f, #171f2f);
   border: 3px solid var(--border);
-  padding: 12px;
+  padding: 14px;
   display: grid;
   gap: 10px;
   box-shadow: 0 8px 0 var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-lg);
 }
 
 .leaderboard-title {
@@ -555,7 +553,7 @@ input {
 
 .leaderboard-list {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   min-height: 80px;
 }
 
@@ -569,6 +567,8 @@ input {
   border: 2px solid #2a3a52;
   font-size: 10px;
   text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .leaderboard-row:nth-child(even) {
@@ -657,7 +657,7 @@ input {
 
 @media (min-width: 900px) {
   :root {
-    --board-width: min(42vw, 340px, 32vh);
+    --board-width: min(40vw, 320px, 30vh);
   }
 }
 
@@ -674,7 +674,7 @@ input {
     --accent-3: #bdbdbd;
     --text: #f5f3ff;
     --muted: #d3cfff;
-    --board-width: min(78vw, 32vh);
+    --board-width: min(72vw, 30vh);
   }
 
   body {

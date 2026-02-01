@@ -12,9 +12,6 @@ const overlayText = document.getElementById("overlay-text");
 const leaderboardList = document.getElementById("leaderboard-list");
 const rankValue = document.getElementById("rank-value");
 const rankScore = document.getElementById("rank-score");
-const loading = document.getElementById("loading");
-const loadingVideo = document.getElementById("loading-video");
-const loadingText = document.getElementById("loading-text");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -1295,58 +1292,6 @@ function loop(time) {
   }
   requestAnimationFrame(loop);
 }
-
-function finishLoading() {
-  if (!loading || loading.classList.contains("loading--done")) return;
-  if (loadingPhraseTimer) {
-    clearInterval(loadingPhraseTimer);
-    loadingPhraseTimer = null;
-  }
-  loading.classList.add("loading--done");
-  setTimeout(() => {
-    if (loading) loading.remove();
-  }, 360);
-}
-
-const loadingStart = performance.now();
-const loadingPhrases = [
-  "Accendo la sabbia...",
-  "Mescolo i granuli...",
-  "Accendo il cabinet...",
-  "Calibro la gravita...",
-  "Quasi pronto...",
-];
-let loadingPhraseIndex = 0;
-let loadingPhraseTimer = null;
-if (loadingText) {
-  loadingPhraseTimer = setInterval(() => {
-    loadingPhraseIndex = (loadingPhraseIndex + 1) % loadingPhrases.length;
-    loadingText.textContent = loadingPhrases[loadingPhraseIndex];
-  }, 900);
-}
-
-if (loadingVideo) {
-  loadingVideo.play().catch(() => {});
-  loadingVideo.addEventListener(
-    "canplay",
-    () => {
-      const elapsed = performance.now() - loadingStart;
-      const delay = Math.max(0, 5000 - elapsed);
-      setTimeout(finishLoading, delay);
-    },
-    { once: true }
-  );
-}
-window.addEventListener(
-  "load",
-  () => {
-    const elapsed = performance.now() - loadingStart;
-    const delay = Math.max(0, 5200 - elapsed);
-    setTimeout(finishLoading, delay);
-  },
-  { once: true }
-);
-setTimeout(finishLoading, 8000);
 
 renderLeaderboard(loadLeaderboard());
 showMenu();
