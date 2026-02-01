@@ -145,7 +145,6 @@ let dissolveQueue = [];
 let dissolveIndex = 0;
 let dissolveAccumulator = 0;
 let dissolveColor = 1;
-let lastMatchSeeds = null;
 let matchActive = false;
 let matchTimer = 0;
 
@@ -246,12 +245,8 @@ function triggerMatchScan() {
   if (matchActive) return false;
   matchVisited.fill(0);
   matchMask.fill(0);
-  const seeds = Array.isArray(lastMatchSeeds) ? lastMatchSeeds : null;
-  if (!seeds || seeds.length === 0) return false;
-  let bestGroup = null;
-  let bestSize = 0;
-  for (const seed of seeds) {
-    if (seed < 0 || seed >= grid.length) continue;
+  let found = false;
+  for (let seed = 0; seed < grid.length; seed++) {
     const color = grid[seed];
     if (!color || matchVisited[seed]) continue;
     const stack = [seed];
@@ -290,15 +285,14 @@ function triggerMatchScan() {
         }
       }
     }
-    if (group.length >= MATCH_MIN && group.length > bestSize) {
-      bestSize = group.length;
-      bestGroup = group;
+    if (group.length >= MATCH_MIN) {
+      found = true;
+      for (const idx of group) {
+        matchMask[idx] = 1;
+      }
     }
   }
-  if (!bestGroup) return false;
-  for (const idx of bestGroup) {
-    matchMask[idx] = 1;
-  }
+  if (!found) return false;
   matchActive = true;
   matchTimer = 0;
   return true;
@@ -602,7 +596,6 @@ function startDissolve() {
     dissolveQueue.push(idx);
     dissolveMask[idx] = 1;
   });
-  lastMatchSeeds = dissolveQueue.slice();
   for (let i = dissolveQueue.length - 1; i > 0; i--) {
     const j = (Math.random() * (i + 1)) | 0;
     [dissolveQueue[i], dissolveQueue[j]] = [dissolveQueue[j], dissolveQueue[i]];
@@ -622,7 +615,6 @@ function finishDissolve() {
   }
   updateHud();
   triggerMatchScan();
-  lastMatchSeeds = null;
 }
 
 function clearRows() {
@@ -814,6 +806,9 @@ function update(dt) {
   if (!matchActive) {
     for (let i = 0; i < SAND_STEPS; i++) {
       stepSand();
+    }
+    if (pieceState !== "dissolving") {
+      triggerMatchScan();
     }
   }
 }
