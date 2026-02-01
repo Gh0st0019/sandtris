@@ -15,6 +15,7 @@ const loadingVideo = document.getElementById("loading-video");
 const loadingText = document.getElementById("loading-text");
 
 const scoreEl = document.getElementById("score");
+const scoreTopEl = document.getElementById("score-top");
 const linesEl = document.getElementById("lines");
 const levelEl = document.getElementById("level");
 
@@ -25,8 +26,8 @@ const GRID_W = GRID_COLS * BLOCK;
 const GRID_H = GRID_ROWS * BLOCK;
 const H_STEP = BLOCK;
 
-const BASE_DROP = 520;
-const MIN_DROP = 80;
+const BASE_DROP = 380;
+const MIN_DROP = 60;
 const CLEAR_THRESHOLD = 0.9;
 const SAND_STEPS = window.innerWidth < 520 ? 2 : 3;
 const SAND_SLIDE_CHANCE = 0.008;
@@ -322,6 +323,7 @@ function updateDropInterval() {
 
 function updateHud() {
   scoreEl.textContent = score.toString();
+  if (scoreTopEl) scoreTopEl.textContent = score.toString();
   linesEl.textContent = lines.toString();
   levelEl.textContent = level.toString();
 }
@@ -681,7 +683,7 @@ function update(dt) {
 
   if (pieceState === "active") {
     dropTimer += dt;
-    const interval = softDropping || touchDropping ? dropInterval * 0.25 : dropInterval;
+    const interval = softDropping || touchDropping ? dropInterval * 0.2 : dropInterval;
     while (dropTimer >= interval) {
       dropTimer -= interval;
       if (!tryMove(0, 1)) {
@@ -933,7 +935,12 @@ canvas.addEventListener("pointerdown", (e) => {
     originY: e.clientY,
     startX: e.clientX,
     startY: e.clientY,
+    lastX: e.clientX,
+    lastY: e.clientY,
     moved: false,
+    axis: null,
+    accumX: 0,
+    accumY: 0,
     startTime: performance.now(),
     cell: getCellSize(),
     holdUsed: false,
@@ -951,7 +958,7 @@ canvas.addEventListener("pointermove", (e) => {
   if (!touch || e.pointerId !== touch.id) return;
   const totalDx = e.clientX - touch.originX;
   const totalDy = e.clientY - touch.originY;
-  if (Math.abs(totalDx) > 6 || Math.abs(totalDy) > 6) {
+  if (Math.abs(totalDx) > 8 || Math.abs(totalDy) > 8) {
     touch.moved = true;
     if (holdTimer) {
       clearTimeout(holdTimer);
@@ -959,21 +966,33 @@ canvas.addEventListener("pointermove", (e) => {
     }
   }
 
-  const stepX = touch.cell * 0.45;
-  const stepY = touch.cell * 0.35;
-  const dxStep = e.clientX - touch.startX;
-  const dyStep = e.clientY - touch.startY;
-
-  if (Math.abs(dxStep) >= stepX) {
-    const dir = dxStep > 0 ? 1 : -1;
-    tryMove(dir * H_STEP, 0);
-    touch.startX += dir * stepX;
+  if (!touch.axis && Math.hypot(totalDx, totalDy) > 10) {
+    touch.axis = Math.abs(totalDx) >= Math.abs(totalDy) ? "x" : "y";
   }
 
-  if (dyStep >= stepY) {
-    tryMove(0, 1);
-    touchDropping = true;
-    touch.startY += stepY;
+  const stepX = touch.cell * 0.6;
+  const stepY = touch.cell * 0.5;
+  const dxStep = e.clientX - touch.lastX;
+  const dyStep = e.clientY - touch.lastY;
+  touch.lastX = e.clientX;
+  touch.lastY = e.clientY;
+
+  if (touch.axis === "x") {
+    touch.accumX += dxStep;
+    while (Math.abs(touch.accumX) >= stepX) {
+      const dir = touch.accumX > 0 ? 1 : -1;
+      tryMove(dir * H_STEP, 0);
+      touch.accumX -= dir * stepX;
+    }
+  } else if (touch.axis === "y") {
+    if (dyStep > 0) {
+      touch.accumY += dyStep;
+      while (touch.accumY >= stepY) {
+        tryMove(0, 1);
+        touchDropping = true;
+        touch.accumY -= stepY;
+      }
+    }
   }
 });
 

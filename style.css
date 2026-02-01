@@ -109,7 +109,7 @@ body::after {
 
 .loading__text {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--muted);
@@ -168,14 +168,20 @@ input {
   display: grid;
   gap: 4px;
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .label {
-  font-size: 8px;
+  font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--muted);
+}
+
+.stat span:not(.label) {
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--text);
 }
 
 .stage {
@@ -192,6 +198,60 @@ input {
   grid-column: 2;
 }
 
+.top-bar {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  opacity: 0;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.top-score {
+  display: grid;
+  gap: 4px;
+  align-items: center;
+  justify-items: center;
+  background: linear-gradient(180deg, #202a3f, #151e2f);
+  border: 2px solid var(--border);
+  padding: 6px 10px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 6px 0 var(--shadow);
+  font-size: 16px;
+}
+
+.top-dots {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 2px solid var(--edge);
+  background: rgba(15, 21, 36, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  box-shadow: 0 0 6px rgba(242, 197, 124, 0.4);
+}
+
+.dot:nth-child(odd) {
+  background: #8ad6ff;
+  box-shadow: 0 0 6px rgba(138, 214, 255, 0.4);
+}
+
+.dot:nth-child(3) {
+  background: var(--accent-2);
+  box-shadow: 0 0 6px rgba(77, 212, 141, 0.4);
+}
+
+.is-playing .top-bar {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 .board-frame {
   position: relative;
   width: var(--board-width);
@@ -199,7 +259,7 @@ input {
   border-radius: 6px;
   border: 4px solid var(--border);
   background: linear-gradient(180deg, #1f2946 0%, #141a2c 100%);
-  box-shadow: 0 12px 0 var(--shadow), 0 0 18px rgba(60, 90, 140, 0.2);
+  box-shadow: 0 12px 0 var(--shadow), 0 0 22px rgba(60, 90, 140, 0.28);
   overflow: hidden;
 }
 
@@ -275,7 +335,7 @@ input {
 }
 
 .menu-kicker {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--muted);
@@ -283,7 +343,7 @@ input {
 
 .menu-title {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 24px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--accent);
@@ -293,7 +353,7 @@ input {
 }
 
 .menu-sub {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--text);
@@ -301,7 +361,7 @@ input {
 
 .menu-text {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--text);
 }
 
@@ -315,7 +375,7 @@ input {
   border: 3px solid #222c41;
   padding: 9px 12px;
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 2px;
   box-shadow: 0 6px 0 var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
@@ -372,7 +432,7 @@ input {
 }
 
 .mini-title {
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--muted);
@@ -401,7 +461,7 @@ input {
 }
 
 .leaderboard-title {
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--accent);
@@ -422,7 +482,7 @@ input {
   padding: 6px 8px;
   background: linear-gradient(180deg, #223049, #182235);
   border: 2px solid #2a3a52;
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
 }
 
@@ -436,7 +496,7 @@ input {
 
 .leaderboard-empty {
   text-align: center;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -453,19 +513,19 @@ input {
 }
 
 .rank-title {
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--muted);
 }
 
 .rank-value {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--accent);
 }
 
 .rank-score {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text);
 }
 
@@ -474,7 +534,7 @@ input {
   left: 12px;
   bottom: 10px;
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--muted);
@@ -528,22 +588,40 @@ input {
   .stage {
     grid-template-columns: 1fr;
     align-items: start;
+    gap: 12px;
   }
 
   .side-panel {
     grid-column: auto;
-    order: 2;
+    order: 3;
+    width: 100%;
   }
 
   .board-panel {
     grid-column: auto;
     order: 1;
+    width: 100%;
   }
 
   .right-panel {
     grid-column: auto;
-    order: 3;
-    justify-items: start;
+    order: 2;
+    justify-items: center;
+    width: 100%;
+  }
+
+  .stats--stack {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .leaderboard {
+    width: 100%;
+    max-height: 32vh;
+    overflow-y: auto;
+  }
+
+  :root {
+    --board-width: min(94vw, 74vh);
   }
 }
 
