@@ -245,7 +245,8 @@ function triggerMatchScan() {
   if (matchActive) return false;
   matchVisited.fill(0);
   matchMask.fill(0);
-  let found = false;
+  let bestGroup = null;
+  let bestSize = 0;
   for (let i = 0; i < grid.length; i++) {
     const color = grid[i];
     if (!color || matchVisited[i]) continue;
@@ -286,17 +287,21 @@ function triggerMatchScan() {
       }
     }
     if (group.length >= MATCH_MIN) {
-      found = true;
-      for (const idx of group) {
-        matchMask[idx] = 1;
+      if (group.length > bestSize) {
+        bestSize = group.length;
+        bestGroup = group;
       }
     }
   }
-  if (found) {
+  if (bestGroup) {
+    for (const idx of bestGroup) {
+      matchMask[idx] = 1;
+    }
     matchActive = true;
     matchTimer = 0;
+    return true;
   }
-  return found;
+  return false;
 }
 
 function refillBag() {
