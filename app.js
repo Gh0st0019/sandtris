@@ -12,7 +12,6 @@ const overlayText = document.getElementById("overlay-text");
 const leaderboardList = document.getElementById("leaderboard-list");
 const rankValue = document.getElementById("rank-value");
 const rankScore = document.getElementById("rank-score");
-const menuCoinsEl = document.getElementById("menu-coins");
 const menuBestEl = document.getElementById("menu-best");
 
 const scoreEl = document.getElementById("score");
@@ -307,7 +306,6 @@ function triggerMatchScan() {
 function updateMenuStats() {
   const list = loadLeaderboard();
   const best = list.length ? list[0].score : 0;
-  if (menuCoinsEl) menuCoinsEl.textContent = `${best}`;
   if (menuBestEl) menuBestEl.textContent = `${best}`;
 }
 
