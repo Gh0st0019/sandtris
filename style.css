@@ -17,7 +17,7 @@
   --border: #31435e;
   --glow: #ffd9a8;
   --edge: #243249;
-  --board-width: min(84vw, 60vh);
+  --board-width: min(72vw, 52vh);
   --board-bg: #1c2442;
   --board-bg-2: #1a2038;
 }
@@ -502,6 +502,7 @@ input {
   grid-column: 3;
   align-content: start;
   justify-items: center;
+  margin-top: -14px;
 }
 
 .mini-card {
@@ -618,9 +619,9 @@ input {
   left: 12px;
   bottom: 10px;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: 6px;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: var(--muted);
   text-shadow: 0 2px 0 #0c111d;
   z-index: 2;
@@ -656,7 +657,7 @@ input {
 
 @media (min-width: 900px) {
   :root {
-    --board-width: min(48vw, 380px, 38vh);
+    --board-width: min(42vw, 340px, 32vh);
   }
 }
 
@@ -673,7 +674,7 @@ input {
     --accent-3: #bdbdbd;
     --text: #f5f3ff;
     --muted: #d3cfff;
-    --board-width: min(86vw, 34vh);
+    --board-width: min(78vw, 32vh);
   }
 
   body {
@@ -779,7 +780,7 @@ input {
 
   .is-playing .mobile-tray {
     display: grid;
-    margin-top: -6px;
+    margin-top: -18px;
   }
 
   .board-frame {
