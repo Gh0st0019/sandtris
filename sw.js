@@ -1,4 +1,4 @@
-const CACHE_NAME = "sandtris-v20260202-10";
+const CACHE_NAME = "sandtris-v20260202-11";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCs669r3JZNH7vhnMtvHo_5TfQHIwYyHdM",
   authDomain: "sandtris-81990.firebaseapp.com",
@@ -11,13 +11,14 @@ const DEFAULT_NOTIFICATION = {
   body: "Pronto per la partita di oggi?",
   icon: "assets/icon-192.png",
   badge: "assets/favicon-32.png",
+  image: "assets/app-icon.png",
 };
 const ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=20260202-10",
-  "./app.js?v=20260202-10",
-  "./manifest.webmanifest?v=20260202-10",
+  "./style.css?v=20260202-11",
+  "./app.js?v=20260202-11",
+  "./manifest.webmanifest?v=20260202-11",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
   "./assets/maskable-icon.png",
@@ -40,6 +41,7 @@ try {
       body: payload?.notification?.body || DEFAULT_NOTIFICATION.body,
       icon: payload?.notification?.icon || DEFAULT_NOTIFICATION.icon,
       badge: payload?.notification?.badge || DEFAULT_NOTIFICATION.badge,
+      image: payload?.notification?.image || DEFAULT_NOTIFICATION.image,
       data: payload?.data || { url: "./" },
     };
     self.registration.showNotification(title, options);

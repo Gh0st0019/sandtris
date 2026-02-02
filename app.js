@@ -16,6 +16,7 @@ const menuBestEl = document.getElementById("menu-best");
 const matchToastEl = document.getElementById("match-toast");
 const notifyBtn = document.getElementById("notify-btn");
 const notifyStatus = document.getElementById("notify-status");
+const notifyCta = document.getElementById("notify-cta");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -50,6 +51,7 @@ const MATCH_EDGE_TOLERANCE = 1;
 const AUDIO_MASTER_GAIN = 0.22;
 const MATCH_CLEAR_RATE = 0.45;
 const PUSH_TOKEN_KEY = "sandtris_push_token";
+const FUNCTIONS_BASE_URL = "https://us-central1-sandtris-81990.cloudfunctions.net";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCs669r3JZNH7vhnMtvHo_5TfQHIwYyHdM",
   authDomain: "sandtris-81990.firebaseapp.com",
@@ -347,11 +349,18 @@ function updateNotifyStatus(message, enabled) {
     notifyBtn.textContent = enabled ? "ENABLED" : "ENABLE";
     notifyBtn.disabled = enabled;
   }
+  if (notifyCta) {
+    notifyCta.textContent = enabled ? "NOTIFY ENABLED" : "ENABLE NOTIFY";
+    notifyCta.disabled = enabled;
+  }
 }
 
 function loadSavedToken() {
   const token = localStorage.getItem(PUSH_TOKEN_KEY);
   if (token) {
+    if (Notification.permission === "granted") {
+      registerPushToken(token);
+    }
     updateNotifyStatus("Notifiche: attive", true);
   } else {
     updateNotifyStatus("Notifiche: disattivate", false);
@@ -402,12 +411,30 @@ async function enableNotifications() {
     });
     if (token) {
       localStorage.setItem(PUSH_TOKEN_KEY, token);
+      registerPushToken(token);
       updateNotifyStatus("Notifiche: attive", true);
     } else {
       updateNotifyStatus("Token non disponibile", false);
     }
   } catch {
     updateNotifyStatus("Errore durante l'attivazione", false);
+  }
+}
+
+async function registerPushToken(token) {
+  if (!token) return;
+  try {
+    await fetch(`${FUNCTIONS_BASE_URL}/registerPushToken`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        origin: window.location.origin,
+      }),
+    });
+  } catch {
+    // Ignore registration errors; user can retry from settings.
   }
 }
 
@@ -1722,6 +1749,12 @@ if ("serviceWorker" in navigator) {
 
 if (notifyBtn) {
   notifyBtn.addEventListener("click", () => {
+    enableNotifications();
+  });
+}
+
+if (notifyCta) {
+  notifyCta.addEventListener("click", () => {
     enableNotifications();
   });
 }

@@ -286,8 +286,8 @@ input {
 
 .hud-icon--crown::before {
   content: "";
-  width: 18px;
-  height: 14px;
+  width: 22px;
+  height: 18px;
   background-image: url("assets/crown.png");
   background-size: contain;
   background-repeat: no-repeat;
@@ -499,8 +499,8 @@ input {
 }
 
 .start-crown-icon {
-  width: 28px;
-  height: 22px;
+  width: 34px;
+  height: 26px;
   background-image: url("assets/crown.png");
   background-size: contain;
   background-repeat: no-repeat;
@@ -596,6 +596,10 @@ input {
   text-transform: uppercase;
   padding: 10px 8px;
   box-shadow: 0 6px 0 #22185e, inset 0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+.start-secondary--notify {
+  width: min(88vw, 300px);
 }
 
 .start-secondary:active {
