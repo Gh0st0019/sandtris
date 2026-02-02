@@ -39,7 +39,6 @@ const SAND_FALL2_CHANCE = 0.08;
 const LANDING_TIME = 120;
 const LONG_PRESS_MS = 380;
 const DISSOLVE_RATE = 0.2;
-const MATCH_MIN = BLOCK * BLOCK * 12;
 const MATCH_FLASH_TIME = 1600;
 const MATCH_FLASH_INTERVAL = 220;
 const WIND_FACTOR = 0.2;
@@ -286,23 +285,28 @@ function renderLeaderboard(list) {
 }
 
 function triggerMatchScan() {
-  const wasActive = matchActive;
   matchVisited.fill(0);
-  if (!wasActive) {
-    matchMask.fill(0);
-  }
+  matchMask.fill(0);
   let found = false;
   for (let seed = 0; seed < grid.length; seed++) {
     const color = grid[seed];
     if (!color || matchVisited[seed]) continue;
     const stack = [seed];
     const group = [];
+    let touchLeft = false;
+    let touchRight = false;
+    let touchTop = false;
+    let touchBottom = false;
     matchVisited[seed] = 1;
     while (stack.length) {
       const idx = stack.pop();
       group.push(idx);
       const x = idx % GRID_W;
       const y = (idx / GRID_W) | 0;
+      if (x === 0) touchLeft = true;
+      if (x === GRID_W - 1) touchRight = true;
+      if (y === 0) touchTop = true;
+      if (y === GRID_H - 1) touchBottom = true;
       if (x > 0) {
         const left = idx - 1;
         if (!matchVisited[left] && grid[left] === color) {
@@ -332,7 +336,7 @@ function triggerMatchScan() {
         }
       }
     }
-    if (group.length >= MATCH_MIN) {
+    if ((touchLeft && touchRight) || (touchTop && touchBottom)) {
       found = true;
       for (const idx of group) {
         matchMask[idx] = 1;
@@ -340,7 +344,7 @@ function triggerMatchScan() {
     }
   }
   if (!found) return false;
-  if (!wasActive) {
+  if (!matchActive) {
     matchActive = true;
     matchTimer = 0;
   }
@@ -880,14 +884,12 @@ function update(dt) {
       matchTimer = 0;
       settleSteps = Math.max(settleSteps, SETTLE_STEPS);
       if (removed > 0) {
-        if (removed >= MATCH_MIN) {
-          const points = Math.floor(removed / 3);
-          score += points;
-          updateHud();
-          const cx = ((sumX / removed) + 0.5) / GRID_W * 100;
-          const cy = ((sumY / removed) + 0.5) / GRID_H * 100;
-          showMatchToast(points, cx, cy);
-        }
+        const points = Math.floor(removed / 3);
+        score += points;
+        updateHud();
+        const cx = ((sumX / removed) + 0.5) / GRID_W * 100;
+        const cy = ((sumY / removed) + 0.5) / GRID_H * 100;
+        showMatchToast(points, cx, cy);
       }
     }
   }
