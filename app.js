@@ -44,6 +44,7 @@ const MATCH_FLASH_INTERVAL = 220;
 const WIND_FACTOR = 0.2;
 const SETTLE_STEPS = 18;
 const MATCH_USE_DIAGONALS = true;
+const MATCH_EDGE_TOLERANCE = 1;
 const AUDIO_MASTER_GAIN = 0.22;
 const MATCH_CLEAR_RATE = 0.45;
 
@@ -415,10 +416,10 @@ function triggerMatchScan() {
       group.push(idx);
       const x = idx % GRID_W;
       const y = (idx / GRID_W) | 0;
-      if (x === 0) touchLeft = true;
-      if (x === GRID_W - 1) touchRight = true;
-      if (y === 0) touchTop = true;
-      if (y === GRID_H - 1) touchBottom = true;
+      if (x <= MATCH_EDGE_TOLERANCE) touchLeft = true;
+      if (x >= GRID_W - 1 - MATCH_EDGE_TOLERANCE) touchRight = true;
+      if (y <= MATCH_EDGE_TOLERANCE) touchTop = true;
+      if (y >= GRID_H - 1 - MATCH_EDGE_TOLERANCE) touchBottom = true;
       if (x > 0) {
         const left = idx - 1;
         if (!matchVisited[left] && grid[left] === color) {
