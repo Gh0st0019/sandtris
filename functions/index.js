@@ -47,7 +47,7 @@ exports.registerPushToken = functions.https.onRequest(async (req, res) => {
 });
 
 exports.dailyReminder = functions.pubsub
-  .schedule("every 35 minutes")
+  .schedule("every 30 minutes")
   .timeZone("Europe/Rome")
   .onRun(async () => {
     const body = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];

@@ -14,9 +14,11 @@ const rankValue = document.getElementById("rank-value");
 const rankScore = document.getElementById("rank-score");
 const menuBestEl = document.getElementById("menu-best");
 const matchToastEl = document.getElementById("match-toast");
-const notifyBtn = document.getElementById("notify-btn");
 const notifyStatus = document.getElementById("notify-status");
-const notifyTestNow = document.getElementById("notify-test-now");
+const notifyPopup = document.getElementById("notify-popup");
+const notifyPopupBtn = document.getElementById("notify-popup-btn");
+const notifyPopupClose = document.getElementById("notify-popup-close");
+const notifyPopupText = document.getElementById("notify-popup-text");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -60,16 +62,6 @@ const FIREBASE_CONFIG = {
   appId: "1:326035049350:web:9ad14c51b0366dc8ccfa07",
 };
 const VAPID_PUBLIC_KEY = "BNEUiE1lsDbhghFu9myf_SGkblXlK6FofRWMMGNite_Ow2Df6_8fHhYjWZ86EssJ6f02KFg46RYbSA29ofHD8cM";
-const REMINDER_MESSAGES = [
-  "⏳ La sabbia scorre e il tabellone ti chiama. Ti va una partita veloce?",
-  "👑 La corona aspetta un nuovo re. Rientra e prova a battere il record!",
-  "✨ Una combo perfetta ti aspetta dietro l’angolo. Torna a giocare ora!",
-  "🔥 Hai 5 minuti? Abbastanza per una run epica. Entra e spacca tutto!",
-  "🎯 Il match perfetto non si fa da solo. Dai, facciamo scintille!",
-  "🌀 Muovi la sabbia, crea magie. Pronto per un’altra sfida?",
-  "🚀 Rientra e fai volare il punteggio. Il tabellone ha fame di match!",
-  "💛 Piccolo reminder: c’è una partita pronta per te. Si gioca?",
-];
 
 canvas.width = GRID_W;
 canvas.height = GRID_H;
@@ -355,10 +347,6 @@ function initFirebaseMessaging() {
 function updateNotifyStatus(message, enabled) {
   if (!notifyStatus) return;
   notifyStatus.textContent = message;
-  if (notifyBtn) {
-    notifyBtn.textContent = enabled ? "ENABLED" : "ENABLE";
-    notifyBtn.disabled = enabled;
-  }
 }
 
 function loadSavedToken() {
@@ -368,9 +356,39 @@ function loadSavedToken() {
       registerPushToken(token);
     }
     updateNotifyStatus("Notifiche: attive", true);
+    hideNotifyPopup();
   } else {
     updateNotifyStatus("Notifiche: disattivate", false);
+    showNotifyPopup();
   }
+}
+
+function showNotifyPopup() {
+  if (!notifyPopup) return;
+  const permission = "Notification" in window ? Notification.permission : "unsupported";
+  let message = "Attiva le notifiche per ricevere promemoria e tornare a giocare.";
+  let canEnable = true;
+  if (permission === "denied") {
+    message = "Notifiche bloccate. Abilita dalle impostazioni del browser.";
+    canEnable = false;
+  } else if (permission === "unsupported") {
+    message = "Notifiche non supportate su questo dispositivo.";
+    canEnable = false;
+  }
+  if (notifyPopupText) {
+    notifyPopupText.textContent = message;
+  }
+  if (notifyPopupBtn) {
+    notifyPopupBtn.disabled = !canEnable;
+  }
+  notifyPopup.classList.add("notify-popup--show");
+  notifyPopup.setAttribute("aria-hidden", "false");
+}
+
+function hideNotifyPopup() {
+  if (!notifyPopup) return;
+  notifyPopup.classList.remove("notify-popup--show");
+  notifyPopup.setAttribute("aria-hidden", "true");
 }
 
 async function ensureServiceWorker() {
@@ -419,24 +437,13 @@ async function enableNotifications() {
       localStorage.setItem(PUSH_TOKEN_KEY, token);
       registerPushToken(token);
       updateNotifyStatus("Notifiche: attive", true);
+      hideNotifyPopup();
     } else {
       updateNotifyStatus("Token non disponibile", false);
     }
   } catch {
     updateNotifyStatus("Errore durante l'attivazione", false);
   }
-}
-
-async function handleTestNow() {
-  if (!("Notification" in window)) {
-    updateNotifyStatus("Notifiche non supportate", false);
-    return;
-  }
-  if (Notification.permission !== "granted") {
-    await enableNotifications();
-  }
-  if (Notification.permission !== "granted") return;
-  await showTestNotification();
 }
 
 async function registerPushToken(token) {
@@ -453,23 +460,6 @@ async function registerPushToken(token) {
     });
   } catch {
     // Ignore registration errors; user can retry from settings.
-  }
-}
-
-async function showTestNotification() {
-  const registration = await ensureServiceWorker();
-  const title = "Sandtris";
-  const body = REMINDER_MESSAGES[(Math.random() * REMINDER_MESSAGES.length) | 0];
-  const options = {
-    body,
-    icon: "assets/app-icon.png",
-    badge: "assets/app-icon.png",
-    data: { url: "./" },
-  };
-  if (registration && registration.showNotification) {
-    registration.showNotification(title, options);
-  } else if ("Notification" in window) {
-    new Notification(title, options);
   }
 }
 
@@ -1782,14 +1772,14 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-if (notifyBtn) {
-  notifyBtn.addEventListener("click", () => {
+if (notifyPopupBtn) {
+  notifyPopupBtn.addEventListener("click", () => {
     enableNotifications();
   });
 }
 
-if (notifyTestNow) {
-  notifyTestNow.addEventListener("click", () => {
-    handleTestNow();
+if (notifyPopupClose) {
+  notifyPopupClose.addEventListener("click", () => {
+    hideNotifyPopup();
   });
 }
