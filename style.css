@@ -225,7 +225,7 @@ input {
 .hud-bar {
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
