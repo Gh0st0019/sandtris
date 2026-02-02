@@ -45,6 +45,7 @@ const WIND_FACTOR = 0.2;
 const SETTLE_STEPS = 18;
 const MATCH_USE_DIAGONALS = true;
 const AUDIO_MASTER_GAIN = 0.22;
+const MATCH_CLEAR_RATE = 0.45;
 
 canvas.width = GRID_W;
 canvas.height = GRID_H;
@@ -249,6 +250,13 @@ let dissolveColor = 1;
 let matchActive = false;
 let matchTimer = 0;
 let settleSteps = 0;
+let matchClearing = false;
+let matchClearQueue = [];
+let matchClearIndex = 0;
+let matchClearAccumulator = 0;
+let matchClearTotal = 0;
+let matchClearSumX = 0;
+let matchClearSumY = 0;
 
 let score = 0;
 let lines = 0;
@@ -461,6 +469,62 @@ function triggerMatchScan() {
     matchTimer = 0;
   }
   return true;
+}
+
+function startMatchClear() {
+  matchClearing = true;
+  matchClearQueue = [];
+  matchClearIndex = 0;
+  matchClearAccumulator = 0;
+  matchClearTotal = 0;
+  matchClearSumX = 0;
+  matchClearSumY = 0;
+  for (let i = 0; i < matchMask.length; i++) {
+    if (!matchMask[i]) continue;
+    matchClearQueue.push(i);
+    matchClearTotal += 1;
+    matchClearSumX += i % GRID_W;
+    matchClearSumY += (i / GRID_W) | 0;
+  }
+  for (let i = matchClearQueue.length - 1; i > 0; i--) {
+    const j = (Math.random() * (i + 1)) | 0;
+    [matchClearQueue[i], matchClearQueue[j]] = [matchClearQueue[j], matchClearQueue[i]];
+  }
+  if (matchClearTotal > 0) {
+    playBreakSound();
+  }
+}
+
+function finishMatchClear() {
+  matchMask.fill(0);
+  matchActive = false;
+  matchClearing = false;
+  matchTimer = 0;
+  settleSteps = Math.max(settleSteps, SETTLE_STEPS);
+  if (matchClearTotal > 0) {
+    const points = Math.floor(matchClearTotal / 3);
+    score += points;
+    updateHud();
+    const cx = ((matchClearSumX / matchClearTotal) + 0.5) / GRID_W * 100;
+    const cy = ((matchClearSumY / matchClearTotal) + 0.5) / GRID_H * 100;
+    showMatchToast(points, cx, cy);
+  }
+}
+
+function updateMatchClear(dt) {
+  matchClearAccumulator += dt * MATCH_CLEAR_RATE;
+  let count = Math.floor(matchClearAccumulator);
+  matchClearAccumulator -= count;
+  while (count > 0 && matchClearIndex < matchClearQueue.length) {
+    const idx = matchClearQueue[matchClearIndex];
+    grid[idx] = 0;
+    matchMask[idx] = 0;
+    matchClearIndex += 1;
+    count -= 1;
+  }
+  if (matchClearIndex >= matchClearQueue.length) {
+    finishMatchClear();
+  }
 }
 
 function updateMenuStats() {
@@ -797,7 +861,6 @@ function finishDissolve() {
     activeTraySlot = null;
   }
   updateHud();
-  triggerMatchScan();
 }
 
 function clearRows() {
@@ -979,50 +1042,41 @@ function update(dt) {
   updatePieceMask();
 
   if (matchActive) {
-    matchTimer += dt;
-    if (matchTimer >= MATCH_FLASH_TIME) {
-      let removed = 0;
-      let sumX = 0;
-      let sumY = 0;
-      for (let i = 0; i < grid.length; i++) {
-        if (matchMask[i]) {
-          grid[i] = 0;
-          removed += 1;
-          sumX += i % GRID_W;
-          sumY += (i / GRID_W) | 0;
+    if (matchClearing) {
+      updateMatchClear(dt);
+    } else {
+      matchTimer += dt;
+      if (matchTimer >= MATCH_FLASH_TIME) {
+        startMatchClear();
+        if (matchClearTotal === 0) {
+          finishMatchClear();
         }
-      }
-      matchMask.fill(0);
-      matchActive = false;
-      matchTimer = 0;
-      settleSteps = Math.max(settleSteps, SETTLE_STEPS);
-      if (removed > 0) {
-        playBreakSound();
-        const points = Math.floor(removed / 3);
-        score += points;
-        updateHud();
-        const cx = ((sumX / removed) + 0.5) / GRID_W * 100;
-        const cy = ((sumY / removed) + 0.5) / GRID_H * 100;
-        showMatchToast(points, cx, cy);
       }
     }
   }
 
   if (!matchActive) {
+    const canScan = pieceState === "idle";
     if (settleSteps > 0) {
       for (let i = 0; i < settleSteps; i++) {
         if (!stepSand()) break;
       }
       settleSteps = 0;
-      triggerMatchScan();
-    } else if (!triggerMatchScan()) {
+      if (canScan) {
+        triggerMatchScan();
+      }
+    } else if (canScan) {
+      if (!triggerMatchScan()) {
+        for (let i = 0; i < SAND_STEPS; i++) {
+          if (!stepSand()) break;
+          if (triggerMatchScan()) break;
+        }
+      }
+    } else {
       for (let i = 0; i < SAND_STEPS; i++) {
         if (!stepSand()) break;
-        if (triggerMatchScan()) break;
       }
     }
-  } else {
-    triggerMatchScan();
   }
 
   if (!gameOver && !matchActive && isOverflowed()) {
