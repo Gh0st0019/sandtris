@@ -89,7 +89,10 @@ const PALETTE = [
   [92, 156, 206],
   [228, 142, 90],
   [168, 128, 210],
-  [238, 156, 100],
+  [220, 72, 78],
+  [233, 128, 184],
+  [68, 90, 166],
+  [240, 240, 244],
 ];
 
 
@@ -127,6 +130,27 @@ function clamp(value, min, max) {
 
 function rgb(color) {
   return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+}
+
+const COLOR_INDICES = Array.from({ length: PALETTE.length - 1 }, (_, i) => i + 1);
+
+function pickPieceColor() {
+  return COLOR_INDICES[(Math.random() * COLOR_INDICES.length) | 0];
+}
+
+function getPieceType(pieceRef) {
+  if (!pieceRef) return null;
+  return typeof pieceRef === "string" ? pieceRef : pieceRef.type;
+}
+
+function getPieceColor(pieceRef) {
+  if (!pieceRef) return null;
+  if (typeof pieceRef === "string") return PIECE_DEFS[pieceRef].color;
+  return pieceRef.color ?? PIECE_DEFS[pieceRef.type].color;
+}
+
+function createTrayPiece(type) {
+  return { type, color: pickPieceColor() };
 }
 
 const TRAY_SIZE = 3;
@@ -382,7 +406,7 @@ function takeFromBag() {
 }
 
 function refillTraySlot(index) {
-  trayPieces[index] = takeFromBag();
+  trayPieces[index] = createTrayPiece(takeFromBag());
 }
 
 function initTray() {
@@ -399,7 +423,11 @@ function renderTray() {
   drawPreview(nextCtx, trayPieces[0]);
 }
 
-function getBoardPositionFromClient(type, clientX, clientY) {
+function getBoardPositionFromClient(pieceRef, clientX, clientY) {
+  const type = getPieceType(pieceRef);
+  if (!type) {
+    return { x: 0, y: 0 };
+  }
   const rect = canvas.getBoundingClientRect();
   const localX = ((clientX - rect.left) / rect.width) * GRID_W;
   const localY = ((clientY - rect.top) / rect.height) * GRID_H;
@@ -418,13 +446,15 @@ function getBoardPositionFromClient(type, clientX, clientY) {
   };
 }
 
-function spawnPiece(type) {
+function spawnPiece(pieceRef) {
+  const type = getPieceType(pieceRef);
+  const color = getPieceColor(pieceRef) ?? pickPieceColor();
   return {
     type,
     rot: 0,
     x: Math.floor(GRID_W / 2 - 2 * BLOCK),
     y: -2 * BLOCK,
-    color: PIECE_DEFS[type].color,
+    color,
   };
 }
 
@@ -450,13 +480,15 @@ function getPieceBounds(type, rot) {
   };
 }
 
-function spawnPieceAt(type, x, y) {
+function spawnPieceAt(pieceRef, x, y) {
+  const type = getPieceType(pieceRef);
+  const color = getPieceColor(pieceRef) ?? pickPieceColor();
   return {
     type,
     rot: 0,
     x,
     y,
-    color: PIECE_DEFS[type].color,
+    color,
   };
 }
 
@@ -965,16 +997,17 @@ function render() {
   }
 
   if (dragging && dragging.inside) {
-    renderGhostPiece(dragging.type, dragging.x, dragging.y);
+    renderGhostPiece(dragging.piece, dragging.x, dragging.y);
   }
 
   ctx.putImageData(imageData, 0, 0);
   frame = (frame + 1) & 1023;
 }
 
-function drawPreview(previewCtx, type) {
+function drawPreview(previewCtx, pieceRef) {
   if (!previewCtx) return;
   previewCtx.clearRect(0, 0, previewCtx.canvas.width, previewCtx.canvas.height);
+  const type = getPieceType(pieceRef);
   if (!type) return;
   const cells = rotations[type][0];
   let minX = 4;
@@ -992,7 +1025,7 @@ function drawPreview(previewCtx, type) {
   const offsetX = Math.floor((4 - width) / 2) - minX;
   const offsetY = Math.floor((4 - height) / 2) - minY;
   const size = previewCtx.canvas.width / 4;
-  const base = PALETTE[PIECE_DEFS[type].color];
+  const base = PALETTE[getPieceColor(pieceRef)];
   const highlight = "rgba(255, 255, 255, 0.22)";
   const shadow = "rgba(0, 0, 0, 0.28)";
   const border = "rgba(0, 0, 0, 0.35)";
@@ -1132,8 +1165,10 @@ function isInsideBoard(clientX, clientY) {
   return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
 }
 
-function renderGhostPiece(type, x, y) {
-  const ghostColor = PALETTE[PIECE_DEFS[type].color];
+function renderGhostPiece(pieceRef, x, y) {
+  const type = getPieceType(pieceRef);
+  if (!type) return;
+  const ghostColor = PALETTE[getPieceColor(pieceRef)];
   const blend = 0.55;
   forEachPiecePixel({ type }, 0, x, y, (gx, gy) => {
     const idx = (gy * GRID_W + gx) * 4;
@@ -1146,11 +1181,11 @@ function renderGhostPiece(type, x, y) {
 
 function startTrayDrag(index, event) {
   if (!running || paused || gameOver || piece || dragging) return;
-  const type = trayPieces[index];
-  if (!type) return;
+  const trayPiece = trayPieces[index];
+  if (!trayPiece) return;
   dragging = {
     slot: index,
-    type,
+    piece: trayPiece,
     pointerId: event.pointerId,
     x: 0,
     y: 0,
@@ -1165,7 +1200,7 @@ function startTrayDrag(index, event) {
 function updateTrayDrag(event) {
   if (!dragging || event.pointerId !== dragging.pointerId) return;
   dragging.inside = isInsideBoard(event.clientX, event.clientY);
-  const pos = getBoardPositionFromClient(dragging.type, event.clientX, event.clientY);
+  const pos = getBoardPositionFromClient(dragging.piece, event.clientX, event.clientY);
   dragging.x = pos.x;
   dragging.y = pos.y;
 }
@@ -1174,9 +1209,9 @@ function endTrayDrag(event) {
   if (!dragging || event.pointerId !== dragging.pointerId) return;
   const releasedInside = dragging.inside && isInsideBoard(event.clientX, event.clientY);
   if (releasedInside) {
-    const pos = getBoardPositionFromClient(dragging.type, event.clientX, event.clientY);
-    const candidate = spawnPieceAt(dragging.type, pos.x, pos.y);
-    const bounds = getPieceBounds(dragging.type, 0);
+    const pos = getBoardPositionFromClient(dragging.piece, event.clientX, event.clientY);
+    const candidate = spawnPieceAt(dragging.piece, pos.x, pos.y);
+    const bounds = getPieceBounds(dragging.piece.type, 0);
     const minY = -bounds.minY * BLOCK;
     let placed = candidate;
     let tries = 0;
@@ -1191,11 +1226,11 @@ function endTrayDrag(event) {
       activeTraySlot = dragging.slot;
       dropTimer = 0;
     } else {
-      trayPieces[dragging.slot] = dragging.type;
+      trayPieces[dragging.slot] = dragging.piece;
       renderTray();
     }
   } else {
-    trayPieces[dragging.slot] = dragging.type;
+    trayPieces[dragging.slot] = dragging.piece;
     renderTray();
   }
   dragging = null;
