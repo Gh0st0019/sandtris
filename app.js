@@ -16,10 +16,7 @@ const menuBestEl = document.getElementById("menu-best");
 const matchToastEl = document.getElementById("match-toast");
 const notifyBtn = document.getElementById("notify-btn");
 const notifyStatus = document.getElementById("notify-status");
-const notifyCta = document.getElementById("notify-cta");
-const notifyTestBtn = document.getElementById("notify-test");
-const notifyStopBtn = document.getElementById("notify-stop");
-const notifyTestStatus = document.getElementById("notify-test-status");
+const notifyTestNow = document.getElementById("notify-test-now");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -118,8 +115,6 @@ let masterGain = null;
 let noiseBuffer = null;
 let messaging = null;
 let swRegistration = null;
-let notifyTestTimer = null;
-let notifyTestCount = 0;
 
 function initAudio() {
   if (audioCtx) return;
@@ -354,17 +349,6 @@ function updateNotifyStatus(message, enabled) {
     notifyBtn.textContent = enabled ? "ENABLED" : "ENABLE";
     notifyBtn.disabled = enabled;
   }
-  if (notifyCta) {
-    notifyCta.textContent = enabled ? "NOTIFY ENABLED" : "ENABLE NOTIFY";
-    notifyCta.disabled = enabled;
-  }
-}
-
-function updateNotifyTestStatus(message, active) {
-  if (!notifyTestStatus) return;
-  notifyTestStatus.textContent = message;
-  if (notifyTestBtn) notifyTestBtn.disabled = active;
-  if (notifyStopBtn) notifyStopBtn.disabled = !active;
 }
 
 function loadSavedToken() {
@@ -433,6 +417,18 @@ async function enableNotifications() {
   }
 }
 
+async function handleTestNow() {
+  if (!("Notification" in window)) {
+    updateNotifyStatus("Notifiche non supportate", false);
+    return;
+  }
+  if (Notification.permission !== "granted") {
+    await enableNotifications();
+  }
+  if (Notification.permission !== "granted") return;
+  await showTestNotification();
+}
+
 async function registerPushToken(token) {
   if (!token) return;
   try {
@@ -454,7 +450,7 @@ async function showTestNotification() {
   const registration = await ensureServiceWorker();
   const title = "Sandtris · Test";
   const options = {
-    body: "Notifica di prova (ogni 5 secondi).",
+    body: "Notifica di prova.",
     icon: "assets/icon-192.png",
     badge: "assets/favicon-32.png",
     image: "assets/app-icon.png",
@@ -465,41 +461,6 @@ async function showTestNotification() {
   } else if ("Notification" in window) {
     new Notification(title, options);
   }
-}
-
-async function startNotifyTest() {
-  if (!("Notification" in window)) {
-    updateNotifyTestStatus("Test: notifiche non supportate", false);
-    return;
-  }
-  const permission = Notification.permission === "granted"
-    ? "granted"
-    : await Notification.requestPermission();
-  if (permission !== "granted") {
-    updateNotifyTestStatus("Test: permesso negato", false);
-    return;
-  }
-  if (notifyTestTimer) return;
-  notifyTestCount = 0;
-  updateNotifyTestStatus("Test: attivo (5s)", true);
-  await showTestNotification();
-  notifyTestTimer = setInterval(async () => {
-    notifyTestCount += 1;
-    if (notifyTestCount >= 24) {
-      stopNotifyTest();
-      return;
-    }
-    await showTestNotification();
-  }, 5000);
-}
-
-function stopNotifyTest() {
-  if (notifyTestTimer) {
-    clearInterval(notifyTestTimer);
-    notifyTestTimer = null;
-  }
-  notifyTestCount = 0;
-  updateNotifyTestStatus("Test: inattivo", false);
 }
 
 function adjustMenuBestFrame() {
@@ -1817,20 +1778,8 @@ if (notifyBtn) {
   });
 }
 
-if (notifyCta) {
-  notifyCta.addEventListener("click", () => {
-    enableNotifications();
-  });
-}
-
-if (notifyTestBtn) {
-  notifyTestBtn.addEventListener("click", () => {
-    startNotifyTest();
-  });
-}
-
-if (notifyStopBtn) {
-  notifyStopBtn.addEventListener("click", () => {
-    stopNotifyTest();
+if (notifyTestNow) {
+  notifyTestNow.addEventListener("click", () => {
+    handleTestNow();
   });
 }
