@@ -1,4 +1,4 @@
-const CACHE_NAME = "sandtris-v20260202-22";
+const CACHE_NAME = "sandtris-v20260202-23";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCs669r3JZNH7vhnMtvHo_5TfQHIwYyHdM",
   authDomain: "sandtris-81990.firebaseapp.com",
@@ -15,9 +15,9 @@ const DEFAULT_NOTIFICATION = {
 const ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=20260202-22",
-  "./app.js?v=20260202-22",
-  "./manifest.webmanifest?v=20260202-22",
+  "./style.css?v=20260202-23",
+  "./app.js?v=20260202-23",
+  "./manifest.webmanifest?v=20260202-23",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
   "./assets/maskable-icon.png",
