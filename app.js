@@ -14,6 +14,8 @@ const rankValue = document.getElementById("rank-value");
 const rankScore = document.getElementById("rank-score");
 const menuBestEl = document.getElementById("menu-best");
 const matchToastEl = document.getElementById("match-toast");
+const notifyBtn = document.getElementById("notify-btn");
+const notifyStatus = document.getElementById("notify-status");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -47,6 +49,15 @@ const MATCH_USE_DIAGONALS = true;
 const MATCH_EDGE_TOLERANCE = 1;
 const AUDIO_MASTER_GAIN = 0.22;
 const MATCH_CLEAR_RATE = 0.45;
+const PUSH_TOKEN_KEY = "sandtris_push_token";
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCs669r3JZNH7vhnMtvHo_5TfQHIwYyHdM",
+  authDomain: "sandtris-81990.firebaseapp.com",
+  projectId: "sandtris-81990",
+  messagingSenderId: "326035049350",
+  appId: "1:326035049350:web:9ad14c51b0366dc8ccfa07",
+};
+const VAPID_PUBLIC_KEY = "BNEUiE1lsDbhghFu9myf_SGkblXlK6FofRWMMGNite_Ow2Df6_8fHhYjWZ86EssJ6f02KFg46RYbSA29ofHD8cM";
 
 canvas.width = GRID_W;
 canvas.height = GRID_H;
@@ -100,6 +111,8 @@ const PALETTE = [
 let audioCtx = null;
 let masterGain = null;
 let noiseBuffer = null;
+let messaging = null;
+let swRegistration = null;
 
 function initAudio() {
   if (audioCtx) return;
@@ -302,6 +315,100 @@ function renderBestScore() {
   if (menuBestEl) menuBestEl.textContent = `${bestScore}`;
   if (bestTopEl) bestTopEl.textContent = `${bestScore}`;
   adjustMenuBestFrame();
+}
+
+function initFirebaseMessaging() {
+  if (!window.firebase || messaging) return messaging;
+  if (!firebase.apps || !firebase.apps.length) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+  }
+  messaging = firebase.messaging();
+  messaging.onMessage((payload) => {
+    if (Notification.permission !== "granted") return;
+    const title = payload?.notification?.title || "Sandtris";
+    const body = payload?.notification?.body || "Pronto per una nuova partita?";
+    const options = {
+      body,
+      icon: "assets/icon-192.png",
+      badge: "assets/favicon-32.png",
+      data: { url: "./" },
+    };
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg) reg.showNotification(title, options);
+    });
+  });
+  return messaging;
+}
+
+function updateNotifyStatus(message, enabled) {
+  if (!notifyStatus) return;
+  notifyStatus.textContent = message;
+  if (notifyBtn) {
+    notifyBtn.textContent = enabled ? "ENABLED" : "ENABLE";
+    notifyBtn.disabled = enabled;
+  }
+}
+
+function loadSavedToken() {
+  const token = localStorage.getItem(PUSH_TOKEN_KEY);
+  if (token) {
+    updateNotifyStatus("Notifiche: attive", true);
+  } else {
+    updateNotifyStatus("Notifiche: disattivate", false);
+  }
+}
+
+async function ensureServiceWorker() {
+  if (!("serviceWorker" in navigator)) return null;
+  if (swRegistration) return swRegistration;
+  try {
+    swRegistration = await navigator.serviceWorker.register("./sw.js");
+    return swRegistration;
+  } catch {
+    swRegistration = null;
+  }
+  try {
+    swRegistration = await navigator.serviceWorker.ready;
+  } catch {
+    return null;
+  }
+  return swRegistration;
+}
+
+async function enableNotifications() {
+  if (!("Notification" in window)) {
+    updateNotifyStatus("Notifiche non supportate", false);
+    return;
+  }
+  initFirebaseMessaging();
+  if (!messaging) {
+    updateNotifyStatus("Notifiche non disponibili", false);
+    return;
+  }
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") {
+    updateNotifyStatus("Notifiche: permesso negato", false);
+    return;
+  }
+  const registration = await ensureServiceWorker();
+  if (!registration) {
+    updateNotifyStatus("Service worker non pronto", false);
+    return;
+  }
+  try {
+    const token = await messaging.getToken({
+      vapidKey: VAPID_PUBLIC_KEY,
+      serviceWorkerRegistration: registration,
+    });
+    if (token) {
+      localStorage.setItem(PUSH_TOKEN_KEY, token);
+      updateNotifyStatus("Notifiche: attive", true);
+    } else {
+      updateNotifyStatus("Token non disponibile", false);
+    }
+  } catch {
+    updateNotifyStatus("Errore durante l'attivazione", false);
+  }
 }
 
 function adjustMenuBestFrame() {
@@ -1604,10 +1711,17 @@ function loop(time) {
 renderLeaderboard(loadLeaderboard());
 showMenu();
 updateHud();
+loadSavedToken();
 requestAnimationFrame(loop);
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
+  });
+}
+
+if (notifyBtn) {
+  notifyBtn.addEventListener("click", () => {
+    enableNotifications();
   });
 }
