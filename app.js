@@ -43,6 +43,8 @@ const MATCH_FLASH_TIME = 1600;
 const MATCH_FLASH_INTERVAL = 220;
 const WIND_FACTOR = 0.2;
 const SETTLE_STEPS = 18;
+const MATCH_USE_DIAGONALS = true;
+const AUDIO_MASTER_GAIN = 0.22;
 
 canvas.width = GRID_W;
 canvas.height = GRID_H;
@@ -92,6 +94,84 @@ const PALETTE = [
   [68, 90, 166],
   [240, 240, 244],
 ];
+
+let audioCtx = null;
+let masterGain = null;
+let noiseBuffer = null;
+
+function initAudio() {
+  if (audioCtx) return;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+  audioCtx = new Ctx();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = AUDIO_MASTER_GAIN;
+  masterGain.connect(audioCtx.destination);
+
+  noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+}
+
+function ensureAudio() {
+  if (!audioCtx) initAudio();
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+}
+
+function playNoiseBurst({ duration, gain, lowpass, highpass, startDelay = 0 }) {
+  if (!audioCtx || !noiseBuffer) return;
+  const now = audioCtx.currentTime + startDelay;
+  const source = audioCtx.createBufferSource();
+  source.buffer = noiseBuffer;
+  const hp = audioCtx.createBiquadFilter();
+  hp.type = "highpass";
+  hp.frequency.setValueAtTime(highpass, now);
+  const lp = audioCtx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.setValueAtTime(lowpass, now);
+  const gainNode = audioCtx.createGain();
+  gainNode.gain.setValueAtTime(0.0001, now);
+  gainNode.gain.exponentialRampToValueAtTime(gain, now + 0.02);
+  gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  source.connect(hp).connect(lp).connect(gainNode).connect(masterGain);
+  source.start(now);
+  source.stop(now + duration + 0.02);
+}
+
+function playThud() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(140, now);
+  osc.frequency.exponentialRampToValueAtTime(70, now + 0.12);
+  gainNode.gain.setValueAtTime(0.0001, now);
+  gainNode.gain.exponentialRampToValueAtTime(0.22, now + 0.01);
+  gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+  osc.connect(gainNode).connect(masterGain);
+  osc.start(now);
+  osc.stop(now + 0.16);
+}
+
+function playCrumbleSound() {
+  ensureAudio();
+  playNoiseBurst({ duration: 0.26, gain: 0.12, lowpass: 1400, highpass: 220 });
+  playNoiseBurst({ duration: 0.18, gain: 0.08, lowpass: 900, highpass: 180, startDelay: 0.08 });
+}
+
+function playBreakSound() {
+  ensureAudio();
+  playThud();
+  playNoiseBurst({ duration: 0.14, gain: 0.18, lowpass: 2400, highpass: 160 });
+}
+
+document.addEventListener("pointerdown", () => ensureAudio(), { once: true });
+document.addEventListener("keydown", () => ensureAudio(), { once: true });
 
 
 const PIECE_DEFS = {
@@ -327,12 +407,44 @@ function triggerMatchScan() {
           matchVisited[up] = 1;
           stack.push(up);
         }
+        if (MATCH_USE_DIAGONALS) {
+          if (x > 0) {
+            const upLeft = idx - GRID_W - 1;
+            if (!matchVisited[upLeft] && grid[upLeft] === color) {
+              matchVisited[upLeft] = 1;
+              stack.push(upLeft);
+            }
+          }
+          if (x < GRID_W - 1) {
+            const upRight = idx - GRID_W + 1;
+            if (!matchVisited[upRight] && grid[upRight] === color) {
+              matchVisited[upRight] = 1;
+              stack.push(upRight);
+            }
+          }
+        }
       }
       if (y < GRID_H - 1) {
         const down = idx + GRID_W;
         if (!matchVisited[down] && grid[down] === color) {
           matchVisited[down] = 1;
           stack.push(down);
+        }
+        if (MATCH_USE_DIAGONALS) {
+          if (x > 0) {
+            const downLeft = idx + GRID_W - 1;
+            if (!matchVisited[downLeft] && grid[downLeft] === color) {
+              matchVisited[downLeft] = 1;
+              stack.push(downLeft);
+            }
+          }
+          if (x < GRID_W - 1) {
+            const downRight = idx + GRID_W + 1;
+            if (!matchVisited[downRight] && grid[downRight] === color) {
+              matchVisited[downRight] = 1;
+              stack.push(downRight);
+            }
+          }
         }
       }
     }
@@ -659,6 +771,7 @@ function startDissolve() {
   dissolveIndex = 0;
   dissolveAccumulator = 0;
   dissolveColor = piece.color;
+  playCrumbleSound();
   dissolveMask.fill(0);
   forEachPiecePixel(piece, piece.rot, piece.x, piece.y, (gx, gy) => {
     const idx = gy * GRID_W + gx;
@@ -884,6 +997,7 @@ function update(dt) {
       matchTimer = 0;
       settleSteps = Math.max(settleSteps, SETTLE_STEPS);
       if (removed > 0) {
+        playBreakSound();
         const points = Math.floor(removed / 3);
         score += points;
         updateHud();
