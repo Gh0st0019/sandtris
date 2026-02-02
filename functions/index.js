@@ -9,9 +9,18 @@ const DEFAULT_NOTIFICATION = {
   title: "Sandtris",
   body: "Torna a giocare: il record ti aspetta.",
   icon: `${APP_URL}/assets/icon-192.png`,
-  badge: `${APP_URL}/assets/favicon-32.png`,
-  image: `${APP_URL}/assets/app-icon.png`,
+  badge: `${APP_URL}/assets/app-icon.png`,
 };
+const REMINDER_MESSAGES = [
+  "La sabbia ti aspetta. Torna a giocare!",
+  "Un match perfetto e dietro l'angolo.",
+  "La corona vuole un nuovo re.",
+  "Hai 5 minuti? Fai una partita.",
+  "Scuoti la sabbia, e ora di vincere.",
+  "Il record non si supera da solo.",
+  "Nuove combo, stessa voglia di giocare.",
+  "Pronto per una partita lampo?",
+];
 
 exports.registerPushToken = functions.https.onRequest(async (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");
@@ -38,23 +47,20 @@ exports.registerPushToken = functions.https.onRequest(async (req, res) => {
 });
 
 exports.dailyReminder = functions.pubsub
-  .schedule("every day 19:30")
+  .schedule("every 35 minutes")
   .timeZone("Europe/Rome")
   .onRun(async () => {
+    const body = REMINDER_MESSAGES[Math.floor(Math.random() * REMINDER_MESSAGES.length)];
     const message = {
       topic: DAILY_TOPIC,
       notification: {
         title: DEFAULT_NOTIFICATION.title,
-        body: DEFAULT_NOTIFICATION.body,
+        body,
       },
       webpush: {
         notification: {
           icon: DEFAULT_NOTIFICATION.icon,
           badge: DEFAULT_NOTIFICATION.badge,
-          image: DEFAULT_NOTIFICATION.image,
-        },
-        fcmOptions: {
-          link: APP_URL,
         },
       },
       data: {

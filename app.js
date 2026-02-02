@@ -60,6 +60,16 @@ const FIREBASE_CONFIG = {
   appId: "1:326035049350:web:9ad14c51b0366dc8ccfa07",
 };
 const VAPID_PUBLIC_KEY = "BNEUiE1lsDbhghFu9myf_SGkblXlK6FofRWMMGNite_Ow2Df6_8fHhYjWZ86EssJ6f02KFg46RYbSA29ofHD8cM";
+const REMINDER_MESSAGES = [
+  "La sabbia si muove! Torna a giocare.",
+  "Il tuo record non si battera da solo.",
+  "Una partita lampo? Ti aspettiamo!",
+  "Match perfetto in arrivo. Pronto?",
+  "Hai una corona da riconquistare.",
+  "Cinque minuti e una combo epica.",
+  "Scuoti la sabbia, e ora di giocare.",
+  "Il tabellone ti chiama.",
+];
 
 canvas.width = GRID_W;
 canvas.height = GRID_H;
@@ -448,12 +458,12 @@ async function registerPushToken(token) {
 
 async function showTestNotification() {
   const registration = await ensureServiceWorker();
-  const title = "Sandtris · Test";
+  const title = "Sandtris";
+  const body = REMINDER_MESSAGES[(Math.random() * REMINDER_MESSAGES.length) | 0];
   const options = {
-    body: "Notifica di prova.",
-    icon: "assets/icon-192.png",
-    badge: "assets/favicon-32.png",
-    image: "assets/app-icon.png",
+    body,
+    icon: "assets/app-icon.png",
+    badge: "assets/app-icon.png",
     data: { url: "./" },
   };
   if (registration && registration.showNotification) {

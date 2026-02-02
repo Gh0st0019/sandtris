@@ -1,4 +1,4 @@
-const CACHE_NAME = "sandtris-v20260202-14";
+const CACHE_NAME = "sandtris-v20260202-15";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCs669r3JZNH7vhnMtvHo_5TfQHIwYyHdM",
   authDomain: "sandtris-81990.firebaseapp.com",
@@ -9,16 +9,15 @@ const FIREBASE_CONFIG = {
 const DEFAULT_NOTIFICATION = {
   title: "Sandtris",
   body: "Pronto per la partita di oggi?",
-  icon: "assets/icon-192.png",
-  badge: "assets/favicon-32.png",
-  image: "assets/app-icon.png",
+  icon: "assets/app-icon.png",
+  badge: "assets/app-icon.png",
 };
 const ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=20260202-14",
-  "./app.js?v=20260202-14",
-  "./manifest.webmanifest?v=20260202-14",
+  "./style.css?v=20260202-15",
+  "./app.js?v=20260202-15",
+  "./manifest.webmanifest?v=20260202-15",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
   "./assets/maskable-icon.png",
@@ -41,7 +40,6 @@ try {
       body: payload?.notification?.body || DEFAULT_NOTIFICATION.body,
       icon: payload?.notification?.icon || DEFAULT_NOTIFICATION.icon,
       badge: payload?.notification?.badge || DEFAULT_NOTIFICATION.badge,
-      image: payload?.notification?.image || DEFAULT_NOTIFICATION.image,
       data: payload?.data || { url: "./" },
     };
     self.registration.showNotification(title, options);
