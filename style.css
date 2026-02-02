@@ -272,15 +272,15 @@ input {
 }
 
 .hud-icon--gear {
-  width: 45px;
-  height: 45px;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
 }
 
 .hud-icon--gear::before {
   content: "";
-  width: 34px;
-  height: 34px;
+  width: 20px;
+  height: 20px;
   background-image: url("assets/exit.png");
   background-size: contain;
   background-repeat: no-repeat;
