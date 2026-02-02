@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Sandtris</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260202-12" />
+    <link rel="manifest" href="manifest.webmanifest?v=20260202-13" />
     <meta name="theme-color" content="#4b34b9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
-    <link rel="stylesheet" href="style.css?v=20260202-12" />
+    <link rel="stylesheet" href="style.css?v=20260202-13" />
   </head>
   <body>
     <div class="app">
@@ -96,7 +96,12 @@
                   <button class="menu-btn menu-btn--start" type="button" id="notify-btn">ENABLE</button>
                   <button class="menu-btn menu-btn--about" data-menu="back">BACK</button>
                 </div>
+                <div class="menu-actions">
+                  <button class="menu-btn" type="button" id="notify-test">TEST 5s</button>
+                  <button class="menu-btn" type="button" id="notify-stop">STOP</button>
+                </div>
                 <p class="menu-text menu-text--hint" id="notify-status">Notifiche: disattivate</p>
+                <p class="menu-text menu-text--hint" id="notify-test-status">Test: inattivo</p>
                 <p class="menu-text menu-text--hint">iOS: aggiungi alla schermata Home per riceverle.</p>
               </div>
                 <div class="overlay-screen overlay-screen--about">
@@ -143,6 +148,6 @@
     <footer class="credit">Made with ❤️ by Ch3rry</footer>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
-    <script src="app.js?v=20260202-12"></script>
+    <script src="app.js?v=20260202-13"></script>
   </body>
 </html>
