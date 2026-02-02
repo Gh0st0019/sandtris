@@ -61,14 +61,14 @@ const FIREBASE_CONFIG = {
 };
 const VAPID_PUBLIC_KEY = "BNEUiE1lsDbhghFu9myf_SGkblXlK6FofRWMMGNite_Ow2Df6_8fHhYjWZ86EssJ6f02KFg46RYbSA29ofHD8cM";
 const REMINDER_MESSAGES = [
-  "La sabbia si muove! Torna a giocare.",
-  "Il tuo record non si battera da solo.",
-  "Una partita lampo? Ti aspettiamo!",
-  "Match perfetto in arrivo. Pronto?",
-  "Hai una corona da riconquistare.",
-  "Cinque minuti e una combo epica.",
-  "Scuoti la sabbia, e ora di giocare.",
-  "Il tabellone ti chiama.",
+  "⏳ La sabbia scorre e il tabellone ti chiama. Ti va una partita veloce?",
+  "👑 La corona aspetta un nuovo re. Rientra e prova a battere il record!",
+  "✨ Una combo perfetta ti aspetta dietro l’angolo. Torna a giocare ora!",
+  "🔥 Hai 5 minuti? Abbastanza per una run epica. Entra e spacca tutto!",
+  "🎯 Il match perfetto non si fa da solo. Dai, facciamo scintille!",
+  "🌀 Muovi la sabbia, crea magie. Pronto per un’altra sfida?",
+  "🚀 Rientra e fai volare il punteggio. Il tabellone ha fame di match!",
+  "💛 Piccolo reminder: c’è una partita pronta per te. Si gioca?",
 ];
 
 canvas.width = GRID_W;

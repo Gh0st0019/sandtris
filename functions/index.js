@@ -12,14 +12,14 @@ const DEFAULT_NOTIFICATION = {
   badge: `${APP_URL}/assets/app-icon.png`,
 };
 const REMINDER_MESSAGES = [
-  "La sabbia ti aspetta. Torna a giocare!",
-  "Un match perfetto e dietro l'angolo.",
-  "La corona vuole un nuovo re.",
-  "Hai 5 minuti? Fai una partita.",
-  "Scuoti la sabbia, e ora di vincere.",
-  "Il record non si supera da solo.",
-  "Nuove combo, stessa voglia di giocare.",
-  "Pronto per una partita lampo?",
+  "⏳ La sabbia scorre e il tabellone ti chiama. Ti va una partita veloce?",
+  "👑 La corona aspetta un nuovo re. Rientra e prova a battere il record!",
+  "✨ Una combo perfetta ti aspetta dietro l’angolo. Torna a giocare ora!",
+  "🔥 Hai 5 minuti? Abbastanza per una run epica. Entra e spacca tutto!",
+  "🎯 Il match perfetto non si fa da solo. Dai, facciamo scintille!",
+  "🌀 Muovi la sabbia, crea magie. Pronto per un’altra sfida?",
+  "🚀 Rientra e fai volare il punteggio. Il tabellone ha fame di match!",
+  "💛 Piccolo reminder: c’è una partita pronta per te. Si gioca?",
 ];
 
 exports.registerPushToken = functions.https.onRequest(async (req, res) => {
