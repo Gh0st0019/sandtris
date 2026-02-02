@@ -272,16 +272,17 @@ input {
 }
 
 .hud-icon--gear {
-  border-radius: 50%;
+  border-radius: 8px;
 }
 
 .hud-icon--gear::before {
   content: "";
-  width: 10px;
-  height: 10px;
-  border: 3px solid #f6f6f6;
-  border-radius: 50%;
-  box-shadow: 0 0 0 2px #1b103d;
+  width: 18px;
+  height: 18px;
+  background-image: url("assets/exit.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .hud-icon--crown::before {
