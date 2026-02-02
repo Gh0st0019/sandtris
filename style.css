@@ -286,8 +286,8 @@ input {
 
 .hud-icon--crown::before {
   content: "";
-  width: 22px;
-  height: 18px;
+  width: 26px;
+  height: 22px;
   background-image: url("assets/crown.png");
   background-size: contain;
   background-repeat: no-repeat;
@@ -499,8 +499,8 @@ input {
 }
 
 .start-crown-icon {
-  width: 34px;
-  height: 26px;
+  width: 40px;
+  height: 32px;
   background-image: url("assets/crown.png");
   background-size: contain;
   background-repeat: no-repeat;
