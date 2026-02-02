@@ -286,11 +286,12 @@ input {
 
 .hud-icon--crown::before {
   content: "";
-  width: 14px;
-  height: 10px;
-  background: linear-gradient(180deg, #ffd666, #f0b24d);
-  clip-path: polygon(0 100%, 20% 40%, 35% 70%, 50% 30%, 65% 70%, 80% 40%, 100% 100%);
-  box-shadow: inset 0 -2px 0 #b6781d;
+  width: 18px;
+  height: 14px;
+  background-image: url("assets/crown.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .hud-icon--coin::before {
@@ -498,11 +499,12 @@ input {
 }
 
 .start-crown-icon {
-  width: 22px;
-  height: 16px;
-  background: linear-gradient(180deg, #ffd666, #f0b24d);
-  clip-path: polygon(0 100%, 20% 40%, 35% 70%, 50% 30%, 65% 70%, 80% 40%, 100% 100%);
-  box-shadow: inset 0 -2px 0 #b6781d;
+  width: 28px;
+  height: 22px;
+  background-image: url("assets/crown.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   display: block;
 }
 
