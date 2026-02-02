@@ -39,10 +39,11 @@ const SAND_FALL2_CHANCE = 0.08;
 const LANDING_TIME = 120;
 const LONG_PRESS_MS = 380;
 const DISSOLVE_RATE = 0.2;
-const MATCH_MIN = BLOCK * BLOCK * 8;
+const MATCH_MIN = BLOCK * BLOCK * 12;
 const MATCH_FLASH_TIME = 1600;
 const MATCH_FLASH_INTERVAL = 220;
 const WIND_FACTOR = 0.2;
+const SETTLE_STEPS = 18;
 
 canvas.width = GRID_W;
 canvas.height = GRID_H;
@@ -168,6 +169,7 @@ let dissolveAccumulator = 0;
 let dissolveColor = 1;
 let matchActive = false;
 let matchTimer = 0;
+let settleSteps = 0;
 
 let score = 0;
 let lines = 0;
@@ -321,40 +323,12 @@ function triggerMatchScan() {
           matchVisited[up] = 1;
           stack.push(up);
         }
-        if (x > 0) {
-          const upLeft = idx - GRID_W - 1;
-          if (!matchVisited[upLeft] && grid[upLeft] === color) {
-            matchVisited[upLeft] = 1;
-            stack.push(upLeft);
-          }
-        }
-        if (x < GRID_W - 1) {
-          const upRight = idx - GRID_W + 1;
-          if (!matchVisited[upRight] && grid[upRight] === color) {
-            matchVisited[upRight] = 1;
-            stack.push(upRight);
-          }
-        }
       }
       if (y < GRID_H - 1) {
         const down = idx + GRID_W;
         if (!matchVisited[down] && grid[down] === color) {
           matchVisited[down] = 1;
           stack.push(down);
-        }
-        if (x > 0) {
-          const downLeft = idx + GRID_W - 1;
-          if (!matchVisited[downLeft] && grid[downLeft] === color) {
-            matchVisited[downLeft] = 1;
-            stack.push(downLeft);
-          }
-        }
-        if (x < GRID_W - 1) {
-          const downRight = idx + GRID_W + 1;
-          if (!matchVisited[downRight] && grid[downRight] === color) {
-            matchVisited[downRight] = 1;
-            stack.push(downRight);
-          }
         }
       }
     }
@@ -698,6 +672,7 @@ function finishDissolve() {
   holdUsed = false;
   piece = null;
   dropTimer = 0;
+  settleSteps = Math.max(settleSteps, SETTLE_STEPS);
   if (activeTraySlot !== null) {
     refillTraySlot(activeTraySlot);
     renderTray();
@@ -751,25 +726,27 @@ function stepSand() {
   nextGrid.set(grid);
   moved.fill(0);
   const bias = wind > 0.85 ? 1 : wind < -0.85 ? -1 : 0;
+  let movedAny = false;
   for (let y = GRID_H - 1; y >= 0; y--) {
     const forward = bias === 0 ? Math.random() > 0.5 : bias > 0;
     if (forward) {
       for (let x = 0; x < GRID_W; x++) {
-        moveSandCell(x, y, bias);
+        if (moveSandCell(x, y, bias)) movedAny = true;
       }
     } else {
       for (let x = GRID_W - 1; x >= 0; x--) {
-        moveSandCell(x, y, bias);
+        if (moveSandCell(x, y, bias)) movedAny = true;
       }
     }
   }
   grid.set(nextGrid);
+  return movedAny;
 }
 
 function moveSandCell(x, y, bias) {
   const idx = y * GRID_W + x;
   const value = nextGrid[idx];
-  if (!value || moved[idx]) return;
+  if (!value || moved[idx]) return false;
   const belowY = y + 1;
   if (belowY < GRID_H) {
     const belowIdx = belowY * GRID_W + x;
@@ -780,13 +757,13 @@ function moveSandCell(x, y, bias) {
           nextGrid[below2Idx] = value;
           nextGrid[idx] = 0;
           moved[below2Idx] = 1;
-          return;
+          return true;
         }
       }
       nextGrid[belowIdx] = value;
       nextGrid[idx] = 0;
       moved[belowIdx] = 1;
-      return;
+      return true;
     }
     const order = bias === 0
       ? (Math.random() > 0.5 ? [1, -1] : [-1, 1])
@@ -800,7 +777,7 @@ function moveSandCell(x, y, bias) {
           nextGrid[diagIdx] = value;
           nextGrid[idx] = 0;
           moved[diagIdx] = 1;
-          return;
+          return true;
         }
       }
     }
@@ -815,11 +792,12 @@ function moveSandCell(x, y, bias) {
         nextGrid[sideIdx] = value;
         nextGrid[idx] = 0;
         moved[sideIdx] = 1;
-        return;
+        return true;
       }
     }
   }
   moved[idx] = 1;
+  return false;
 }
 
 function updateLanding(dt) {
@@ -900,6 +878,7 @@ function update(dt) {
       matchMask.fill(0);
       matchActive = false;
       matchTimer = 0;
+      settleSteps = Math.max(settleSteps, SETTLE_STEPS);
       if (removed > 0) {
         if (removed >= MATCH_MIN) {
           const points = Math.floor(removed / 3);
@@ -914,9 +893,15 @@ function update(dt) {
   }
 
   if (!matchActive) {
-    if (!triggerMatchScan()) {
+    if (settleSteps > 0) {
+      for (let i = 0; i < settleSteps; i++) {
+        if (!stepSand()) break;
+      }
+      settleSteps = 0;
+      triggerMatchScan();
+    } else if (!triggerMatchScan()) {
       for (let i = 0; i < SAND_STEPS; i++) {
-        stepSand();
+        if (!stepSand()) break;
         if (triggerMatchScan()) break;
       }
     }
