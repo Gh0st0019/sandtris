@@ -173,6 +173,7 @@ function playBreakSound() {
 
 document.addEventListener("pointerdown", () => ensureAudio(), { once: true });
 document.addEventListener("keydown", () => ensureAudio(), { once: true });
+window.addEventListener("resize", () => adjustMenuBestFrame());
 
 
 const PIECE_DEFS = {
@@ -299,6 +300,29 @@ function updateBestScore(value) {
 function renderBestScore() {
   if (menuBestEl) menuBestEl.textContent = `${bestScore}`;
   if (bestTopEl) bestTopEl.textContent = `${bestScore}`;
+  adjustMenuBestFrame();
+}
+
+function adjustMenuBestFrame() {
+  if (!menuBestEl) return;
+  const crown = menuBestEl.closest(".start-crown");
+  if (!crown) return;
+  const crownStyle = window.getComputedStyle(crown);
+  const paddingX = parseFloat(crownStyle.paddingLeft) + parseFloat(crownStyle.paddingRight);
+  const minWidth = 104;
+  const maxWidth = Math.min(window.innerWidth * 0.92, 360);
+  menuBestEl.style.fontSize = "";
+  crown.style.width = "auto";
+  const labelWidth = menuBestEl.getBoundingClientRect().width;
+  let target = Math.max(minWidth, Math.ceil(labelWidth + paddingX));
+  target = Math.min(maxWidth, target);
+  crown.style.width = `${target}px`;
+  const available = target - paddingX;
+  if (labelWidth > available) {
+    const baseSize = parseFloat(window.getComputedStyle(menuBestEl).fontSize) || 24;
+    const scale = available / labelWidth;
+    menuBestEl.style.fontSize = `${Math.max(14, baseSize * scale)}px`;
+  }
 }
 
 function getISOWeekKey(date) {

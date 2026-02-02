@@ -479,7 +479,8 @@ input {
 }
 
 .start-crown {
-  width: fit-content;
+  width: auto;
+  max-width: 100%;
   min-width: 104px;
   min-height: 104px;
   padding: 10px 14px 12px;
@@ -512,6 +513,7 @@ input {
 }
 
 .start-crown #menu-best {
+  display: inline-block;
   white-space: nowrap;
 }
 
