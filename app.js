@@ -191,7 +191,10 @@ function playBreakSound() {
 
 document.addEventListener("pointerdown", () => ensureAudio(), { once: true });
 document.addEventListener("keydown", () => ensureAudio(), { once: true });
-window.addEventListener("resize", () => adjustMenuBestFrame());
+window.addEventListener("resize", () => {
+  adjustMenuBestFrame();
+  syncHudExitButton();
+});
 
 
 const PIECE_DEFS = {
@@ -483,6 +486,15 @@ function adjustMenuBestFrame() {
     const scale = available / labelWidth;
     menuBestEl.style.fontSize = `${Math.max(14, baseSize * scale)}px`;
   }
+}
+
+function syncHudExitButton() {
+  const gear = document.querySelector(".hud-icon--gear");
+  const bestPill = document.querySelector(".hud-row .hud-pill");
+  if (!gear || !bestPill) return;
+  const height = bestPill.getBoundingClientRect().height;
+  if (!height || height < 1) return;
+  gear.style.setProperty("--hud-gear-size", `${Math.round(height)}px`);
 }
 
 function getISOWeekKey(date) {
@@ -906,6 +918,7 @@ function startGame() {
   document.body.classList.add("is-playing");
   hideOverlay();
   updateHud();
+  syncHudExitButton();
 }
 
 function endGame() {
@@ -1763,6 +1776,7 @@ function loop(time) {
 renderLeaderboard(loadLeaderboard());
 showMenu();
 updateHud();
+syncHudExitButton();
 loadSavedToken();
 requestAnimationFrame(loop);
 

@@ -272,10 +272,8 @@ input {
 }
 
 .hud-icon--gear {
-  width: auto;
-  height: auto;
-  align-self: stretch;
-  aspect-ratio: 1 / 1;
+  width: var(--hud-gear-size, 40px);
+  height: var(--hud-gear-size, 40px);
   border-radius: 12px;
 }
 
