@@ -723,6 +723,81 @@ input {
   text-align: center;
 }
 
+.tutorial {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: none;
+  pointer-events: auto;
+}
+
+.tutorial--show {
+  display: block;
+}
+
+.tutorial__spotlight {
+  position: absolute;
+  border-radius: 16px;
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 0 9999px rgba(6, 10, 18, 0.78),
+    0 0 18px rgba(242, 197, 124, 0.55);
+  transition: all 180ms ease;
+  pointer-events: none;
+  animation: tutorial-pulse 1.6s ease-in-out infinite;
+}
+
+.tutorial__card {
+  position: absolute;
+  left: 50%;
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(86vw, 320px);
+  background: linear-gradient(180deg, #202a3f, #171f2f);
+  border: 3px solid var(--border);
+  box-shadow: 0 10px 0 var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.tutorial__kicker {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tutorial__title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+}
+
+.tutorial__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.tutorial__progress {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tutorial__actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .side-panel {
   display: grid;
   grid-template-columns: 1fr;
@@ -922,6 +997,18 @@ input {
   }
 }
 
+@keyframes tutorial-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 9999px rgba(6, 10, 18, 0.78),
+      0 0 10px rgba(242, 197, 124, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 9999px rgba(6, 10, 18, 0.78),
+      0 0 20px rgba(242, 197, 124, 0.7);
+  }
+}
+
 
 @media (min-width: 900px) {
   :root {
@@ -964,6 +1051,10 @@ input {
   }
 
   .menu-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .tutorial__actions {
     grid-template-columns: 1fr;
   }
 
@@ -1067,6 +1158,9 @@ input {
 
 @media (prefers-reduced-motion: reduce) {
   .menu-title {
+    animation: none;
+  }
+  .tutorial__spotlight {
     animation: none;
   }
 }

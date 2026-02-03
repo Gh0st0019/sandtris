@@ -19,6 +19,14 @@ const notifyPopup = document.getElementById("notify-popup");
 const notifyPopupBtn = document.getElementById("notify-popup-btn");
 const notifyPopupClose = document.getElementById("notify-popup-close");
 const notifyPopupText = document.getElementById("notify-popup-text");
+const tutorial = document.getElementById("tutorial");
+const tutorialSpotlight = document.getElementById("tutorial-spotlight");
+const tutorialTitle = document.getElementById("tutorial-title");
+const tutorialText = document.getElementById("tutorial-text");
+const tutorialProgress = document.getElementById("tutorial-progress");
+const tutorialNextBtn = document.getElementById("tutorial-next");
+const tutorialSkipBtn = document.getElementById("tutorial-skip");
+const tutorialCard = tutorial ? tutorial.querySelector(".tutorial__card") : null;
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -287,6 +295,8 @@ let level = 1;
 let running = false;
 let paused = false;
 let gameOver = false;
+let tutorialActive = false;
+let tutorialStepIndex = 0;
 
 let dropInterval = BASE_DROP;
 let dropTimer = 0;
@@ -301,6 +311,7 @@ const imageData = ctx.createImageData(GRID_W, GRID_H);
 
 const BEST_SCORE_KEY = "sandtris_best_v1";
 const LEADERBOARD_KEY_PREFIX = "sandtris_weekly_v1";
+const TUTORIAL_KEY = "sandtris_tutorial_v1";
 const PLAYER_NAME = "YOU";
 let bestScore = 0;
 
@@ -854,6 +865,158 @@ function updateHud() {
   renderBestScore();
 }
 
+const TUTORIAL_STEPS = [
+  {
+    title: "Prendi un pezzo",
+    text: "Scegli un blocco dal vassoio e trascinalo nel tabellone.",
+    targets: [".mobile-tray", ".tray-slot", ".board-frame"],
+    padding: 10,
+  },
+  {
+    title: "Muovi e ruota",
+    text: "Tocca per ruotare, trascina per spostare. Swipe in giu per drop veloce.",
+    targets: [".board-frame"],
+    padding: 12,
+  },
+  {
+    title: "Fai match",
+    text: "Unisci molti granuli dello stesso colore per fare punti.",
+    targets: [".board-frame"],
+    padding: 12,
+  },
+];
+
+function hasSeenTutorial() {
+  try {
+    return localStorage.getItem(TUTORIAL_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markTutorialSeen() {
+  try {
+    localStorage.setItem(TUTORIAL_KEY, "1");
+  } catch {
+    // Ignore storage failures.
+  }
+}
+
+function isVisibleTarget(element) {
+  if (!element) return false;
+  const rect = element.getBoundingClientRect();
+  if (rect.width <= 4 || rect.height <= 4) return false;
+  if (rect.bottom <= 0 || rect.right <= 0) return false;
+  if (rect.top >= window.innerHeight || rect.left >= window.innerWidth) return false;
+  return true;
+}
+
+function findTutorialTarget(selectors) {
+  for (const selector of selectors || []) {
+    const target = document.querySelector(selector);
+    if (isVisibleTarget(target)) return target;
+  }
+  return null;
+}
+
+function placeTutorialSpotlight(target, padding) {
+  if (!tutorialSpotlight) return;
+  if (!target) {
+    tutorialSpotlight.style.opacity = "0";
+    return;
+  }
+  const rect = target.getBoundingClientRect();
+  const pad = Math.max(6, padding || 0);
+  const left = Math.max(8, rect.left - pad);
+  const top = Math.max(8, rect.top - pad);
+  const right = Math.min(window.innerWidth - 8, rect.right + pad);
+  const bottom = Math.min(window.innerHeight - 8, rect.bottom + pad);
+  const width = Math.max(12, right - left);
+  const height = Math.max(12, bottom - top);
+  tutorialSpotlight.style.opacity = "1";
+  tutorialSpotlight.style.left = `${left}px`;
+  tutorialSpotlight.style.top = `${top}px`;
+  tutorialSpotlight.style.width = `${width}px`;
+  tutorialSpotlight.style.height = `${height}px`;
+}
+
+function positionTutorialCard(target) {
+  if (!tutorialCard) return;
+  if (!target) {
+    tutorialCard.style.top = "";
+    tutorialCard.style.bottom = "calc(22px + env(safe-area-inset-bottom))";
+    return;
+  }
+  const rect = target.getBoundingClientRect();
+  const placeTop = rect.bottom > window.innerHeight * 0.6;
+  tutorialCard.style.top = placeTop ? "calc(22px + env(safe-area-inset-top))" : "";
+  tutorialCard.style.bottom = placeTop
+    ? ""
+    : "calc(22px + env(safe-area-inset-bottom))";
+}
+
+function updateTutorialLayout() {
+  if (!tutorialActive) return;
+  const step = TUTORIAL_STEPS[tutorialStepIndex];
+  if (!step) return;
+  const target = findTutorialTarget(step.targets);
+  placeTutorialSpotlight(target, step.padding);
+  positionTutorialCard(target);
+}
+
+function showTutorialStep() {
+  if (!tutorial) return;
+  const step = TUTORIAL_STEPS[tutorialStepIndex];
+  if (!step) {
+    endTutorial();
+    return;
+  }
+  if (tutorialTitle) tutorialTitle.textContent = step.title;
+  if (tutorialText) tutorialText.textContent = step.text;
+  if (tutorialProgress) {
+    tutorialProgress.textContent = `${tutorialStepIndex + 1}/${TUTORIAL_STEPS.length}`;
+  }
+  if (tutorialNextBtn) {
+    tutorialNextBtn.textContent =
+      tutorialStepIndex === TUTORIAL_STEPS.length - 1 ? "START" : "AVANTI";
+  }
+  tutorial.classList.add("tutorial--show");
+  tutorial.setAttribute("aria-hidden", "false");
+  requestAnimationFrame(updateTutorialLayout);
+}
+
+function startTutorial() {
+  if (!tutorial || tutorialActive || hasSeenTutorial()) return;
+  tutorialActive = true;
+  tutorialStepIndex = 0;
+  paused = true;
+  showTutorialStep();
+  window.addEventListener("resize", updateTutorialLayout);
+}
+
+function endTutorial() {
+  if (!tutorialActive) return;
+  tutorialActive = false;
+  paused = false;
+  markTutorialSeen();
+  if (tutorial) {
+    tutorial.classList.remove("tutorial--show");
+    tutorial.setAttribute("aria-hidden", "true");
+  }
+  if (tutorialSpotlight) tutorialSpotlight.style.opacity = "0";
+  window.removeEventListener("resize", updateTutorialLayout);
+}
+
+function advanceTutorial() {
+  if (!tutorialActive) return;
+  tutorialStepIndex += 1;
+  if (tutorialStepIndex >= TUTORIAL_STEPS.length) {
+    endTutorial();
+  } else {
+    showTutorialStep();
+  }
+}
+
 
 function showMenu() {
   overlay.dataset.state = "menu";
@@ -919,6 +1082,7 @@ function startGame() {
   hideOverlay();
   updateHud();
   syncHudExitButton();
+  startTutorial();
 }
 
 function endGame() {
@@ -1397,6 +1561,7 @@ function drawPreview(previewCtx, pieceRef) {
 }
 
 function handleAction(action) {
+  if (tutorialActive) return;
   if (!running) {
     startGame();
     return;
@@ -1432,6 +1597,7 @@ function handleAction(action) {
 const repeatTimers = new Map();
 
 function startRepeat(action) {
+  if (tutorialActive) return;
   if (repeatTimers.has(action)) return;
   if (action === "down") {
     softDropping = true;
@@ -1530,6 +1696,7 @@ function renderGhostPiece(pieceRef, x, y) {
 }
 
 function startTrayDrag(index, event) {
+  if (tutorialActive) return;
   if (!running || paused || gameOver || piece || dragging) return;
   const trayPiece = trayPieces[index];
   if (!trayPiece) return;
@@ -1588,6 +1755,7 @@ function endTrayDrag(event) {
 
 canvas.addEventListener("pointerdown", (e) => {
   if (dragging) return;
+  if (tutorialActive) return;
   if (!running || paused || gameOver || pieceState !== "active") return;
   touch = {
     id: e.pointerId,
@@ -1705,6 +1873,7 @@ window.addEventListener("blur", () => {
 });
 
 window.addEventListener("keydown", (e) => {
+  if (tutorialActive) return;
   if (e.repeat) return;
   switch (e.code) {
     case "ArrowLeft":
@@ -1795,5 +1964,17 @@ if (notifyPopupBtn) {
 if (notifyPopupClose) {
   notifyPopupClose.addEventListener("click", () => {
     hideNotifyPopup();
+  });
+}
+
+if (tutorialNextBtn) {
+  tutorialNextBtn.addEventListener("click", () => {
+    advanceTutorial();
+  });
+}
+
+if (tutorialSkipBtn) {
+  tutorialSkipBtn.addEventListener("click", () => {
+    endTutorial();
   });
 }
