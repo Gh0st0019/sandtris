@@ -764,7 +764,7 @@ input {
 }
 
 .tutorial__kicker {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--muted);
@@ -772,7 +772,7 @@ input {
 
 .tutorial__title {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 18px;
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--accent);
@@ -780,13 +780,13 @@ input {
 
 .tutorial__text {
   margin: 0;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.4;
   color: var(--text);
 }
 
 .tutorial__progress {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--muted);
