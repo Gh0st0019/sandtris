@@ -780,7 +780,7 @@ input {
 
 .tutorial__text {
   margin: 0;
-  font-size: 18px;
+  font-size: 22px;
   line-height: 1.45;
   color: var(--text);
 }
