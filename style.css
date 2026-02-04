@@ -1217,7 +1217,7 @@ input {
   }
 }
 
-/* Compact layout for all screens: match the mobile style everywhere. */
+/* Compact palette for all screens: match the mobile style everywhere. */
 :root {
   --bg-0: #4a33b8;
   --bg-1: #5c43c9;
@@ -1230,7 +1230,6 @@ input {
   --accent-3: #bdbdbd;
   --text: #f5f3ff;
   --muted: #d3cfff;
-  --board-width: min(72vw, 46dvh, 420px);
 }
 
 body {
@@ -1245,30 +1244,36 @@ body::before {
   opacity: 0.25;
 }
 
-.app {
-  width: min(100%, 560px);
-  padding: 10px 12px 14px;
-  min-height: 100dvh;
-}
+@media (min-width: 521px) {
+  :root {
+    --board-width: min(66vw, 28vh);
+  }
 
-.stage {
-  grid-template-columns: 1fr;
-  grid-template-areas: "board";
-  align-items: start;
-  justify-items: center;
-}
+  .app {
+    width: min(100%, 560px);
+    padding: 10px 12px 14px;
+    min-height: 100dvh;
+  }
 
-.board-panel {
-  width: min(100%, calc(var(--board-width) + 24px));
-}
+  .stage {
+    grid-template-columns: 1fr;
+    grid-template-areas: "board";
+    align-items: start;
+    justify-items: center;
+  }
 
-.side-panel,
-.right-panel {
-  display: none;
-}
+  .board-panel {
+    width: min(100%, calc(var(--board-width) + 24px));
+  }
 
-.is-playing .top-bar {
-  display: grid;
+  .side-panel,
+  .right-panel {
+    display: none;
+  }
+
+  .is-playing .top-bar {
+    display: grid;
+  }
 }
 
 @media (min-width: 900px) {
