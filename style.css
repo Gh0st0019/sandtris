@@ -131,7 +131,7 @@ button:active,
 
 .support-stack {
   position: fixed;
-  right: 18px;
+  right: 32px;
   bottom: 12px;
   z-index: 12;
   display: flex;
