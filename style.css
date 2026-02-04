@@ -1273,23 +1273,23 @@ body::before {
 
 @media (min-width: 900px) {
   :root {
-    --board-width: min(46vw, 60dvh, 520px);
+    --board-width: min(38vw, 50dvh, 420px);
   }
 
   .app {
-    width: min(100%, 820px);
+    width: min(100%, 760px);
   }
 
   .board-panel {
-    grid-template-columns: var(--board-width) minmax(140px, 200px);
+    grid-template-columns: var(--board-width) minmax(120px, 180px);
     grid-template-areas:
       "top top"
       "board tray";
     align-items: start;
     justify-content: center;
-    column-gap: 18px;
+    column-gap: 14px;
     row-gap: 12px;
-    width: min(100%, calc(var(--board-width) + 220px));
+    width: min(100%, calc(var(--board-width) + 200px));
   }
 
   .top-bar {
@@ -1302,9 +1302,9 @@ body::before {
 
   .mobile-tray {
     grid-area: tray;
-    width: min(200px, 26vw);
+    width: min(180px, 24vw);
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 8px;
   }
 
   .is-playing .mobile-tray {
