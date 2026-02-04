@@ -214,6 +214,9 @@ const PIECE_DEFS = {
   Z: { color: 5, cells: [[0, 0], [1, 0], [1, 1], [2, 1]] },
   J: { color: 6, cells: [[0, 0], [0, 1], [1, 1], [2, 1]] },
   L: { color: 7, cells: [[2, 0], [0, 1], [1, 1], [2, 1]] },
+  P: { color: 8, cells: [[0, 0], [1, 0], [0, 1], [1, 1], [0, 2]] },
+  U: { color: 2, cells: [[0, 0], [2, 0], [0, 1], [1, 1], [2, 1]] },
+  X: { color: 3, cells: [[1, 0], [0, 1], [1, 1], [2, 1], [1, 2]] },
 };
 
 const rotations = {};
@@ -264,7 +267,6 @@ function createTrayPiece(type) {
 }
 
 const TRAY_SIZE = 3;
-let bag = [];
 let piece = null;
 let trayPieces = new Array(TRAY_SIZE).fill(null);
 let activeTraySlot = null;
@@ -752,17 +754,9 @@ function showMatchToast(points, xPct, yPct) {
   matchToastEl.classList.add("match-toast--show");
 }
 
-function refillBag() {
-  bag = Object.keys(PIECE_DEFS);
-  for (let i = bag.length - 1; i > 0; i--) {
-    const j = (Math.random() * (i + 1)) | 0;
-    [bag[i], bag[j]] = [bag[j], bag[i]];
-  }
-}
-
 function takeFromBag() {
-  if (!bag.length) refillBag();
-  return bag.pop();
+  const types = Object.keys(PIECE_DEFS);
+  return types[(Math.random() * types.length) | 0];
 }
 
 function refillTraySlot(index) {
@@ -1059,7 +1053,6 @@ function startGame() {
   lines = 0;
   level = 1;
   updateDropInterval();
-  bag = [];
   holdType = null;
   holdUsed = false;
   piece = null;
