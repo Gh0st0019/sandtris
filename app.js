@@ -65,6 +65,7 @@ const MATCH_EDGE_TOLERANCE = 1;
 const AUDIO_MASTER_GAIN = 0.22;
 const MATCH_CLEAR_RATE = 0.45;
 const CLEANUP_INTERVAL = 2600;
+const CLEANUP_MAX_CLUSTER = 3;
 const PUSH_TOKEN_KEY = "sandtris_push_token";
 const FUNCTIONS_BASE_URL = "https://us-central1-sandtris-81990.cloudfunctions.net";
 const FIREBASE_CONFIG = {
@@ -1392,28 +1393,40 @@ function isOverflowed() {
 }
 
 function cleanupIsolatedPixels() {
+  const visited = new Uint8Array(grid.length);
   const toClear = [];
-  for (let idx = 0; idx < grid.length; idx++) {
-    const color = grid[idx];
-    if (!color) continue;
-    const x = idx % GRID_W;
-    const y = (idx / GRID_W) | 0;
-    let hasNeighbor = false;
-    if (x > 0 && grid[idx - 1] === color) hasNeighbor = true;
-    if (!hasNeighbor && x < GRID_W - 1 && grid[idx + 1] === color) hasNeighbor = true;
-    if (!hasNeighbor && y > 0 && grid[idx - GRID_W] === color) hasNeighbor = true;
-    if (!hasNeighbor && y < GRID_H - 1 && grid[idx + GRID_W] === color) hasNeighbor = true;
-    if (!hasNeighbor && MATCH_USE_DIAGONALS) {
-      if (x > 0 && y > 0 && grid[idx - GRID_W - 1] === color) hasNeighbor = true;
-      if (!hasNeighbor && x < GRID_W - 1 && y > 0 && grid[idx - GRID_W + 1] === color)
-        hasNeighbor = true;
-      if (!hasNeighbor && x > 0 && y < GRID_H - 1 && grid[idx + GRID_W - 1] === color)
-        hasNeighbor = true;
-      if (!hasNeighbor && x < GRID_W - 1 && y < GRID_H - 1 && grid[idx + GRID_W + 1] === color)
-        hasNeighbor = true;
+  for (let seed = 0; seed < grid.length; seed++) {
+    const color = grid[seed];
+    if (!color || visited[seed]) continue;
+    const stack = [seed];
+    const cluster = [];
+    visited[seed] = 1;
+    while (stack.length) {
+      const idx = stack.pop();
+      cluster.push(idx);
+      if (cluster.length > CLEANUP_MAX_CLUSTER) break;
+      const x = idx % GRID_W;
+      const y = (idx / GRID_W) | 0;
+      const neighbors = [];
+      if (x > 0) neighbors.push(idx - 1);
+      if (x < GRID_W - 1) neighbors.push(idx + 1);
+      if (y > 0) neighbors.push(idx - GRID_W);
+      if (y < GRID_H - 1) neighbors.push(idx + GRID_W);
+      if (MATCH_USE_DIAGONALS) {
+        if (x > 0 && y > 0) neighbors.push(idx - GRID_W - 1);
+        if (x < GRID_W - 1 && y > 0) neighbors.push(idx - GRID_W + 1);
+        if (x > 0 && y < GRID_H - 1) neighbors.push(idx + GRID_W - 1);
+        if (x < GRID_W - 1 && y < GRID_H - 1) neighbors.push(idx + GRID_W + 1);
+      }
+      for (const n of neighbors) {
+        if (!visited[n] && grid[n] === color) {
+          visited[n] = 1;
+          stack.push(n);
+        }
+      }
     }
-    if (!hasNeighbor) {
-      toClear.push(idx);
+    if (cluster.length <= CLEANUP_MAX_CLUSTER) {
+      toClear.push(...cluster);
     }
   }
   if (toClear.length === 0) return;
