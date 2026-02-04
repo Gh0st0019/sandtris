@@ -27,6 +27,9 @@ const tutorialProgress = document.getElementById("tutorial-progress");
 const tutorialNextBtn = document.getElementById("tutorial-next");
 const tutorialSkipBtn = document.getElementById("tutorial-skip");
 const tutorialCard = tutorial ? tutorial.querySelector(".tutorial__card") : null;
+const installGate = document.getElementById("install-gate");
+const installBtn = document.getElementById("install-btn");
+const installHint = document.getElementById("install-hint");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -1978,6 +1981,71 @@ if (tutorialSkipBtn) {
     endTutorial();
   });
 }
+
+(() => {
+  if (!installGate || !installBtn) return;
+
+  const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+  if (isStandalone) {
+    installGate.classList.add("install-gate--hidden");
+    installGate.setAttribute("aria-hidden", "true");
+    return;
+  }
+
+  let deferredPrompt = null;
+
+  function showGate() {
+    installGate.classList.remove("install-gate--hidden");
+    installGate.setAttribute("aria-hidden", "false");
+  }
+
+  function hideGate() {
+    installGate.classList.add("install-gate--hidden");
+    installGate.setAttribute("aria-hidden", "true");
+  }
+
+  if (isIos()) {
+    if (installHint) {
+      installHint.textContent =
+        "Su iPhone/iPad: tocca Condividi e scegli “Aggiungi a schermata Home”.";
+    }
+    showGate();
+  } else {
+    if (installHint) {
+      installHint.textContent = "Premi il pulsante per aggiungere l'app alla Home.";
+    }
+    showGate();
+  }
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredPrompt = event;
+  });
+
+  installBtn.addEventListener("click", async () => {
+    if (!deferredPrompt) {
+      if (isIos()) {
+        showGate();
+        return;
+      }
+      if (installHint) {
+        installHint.textContent = "Apri il menu del browser e scegli “Installa app”.";
+      }
+      return;
+    }
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (choice?.outcome === "accepted") {
+      hideGate();
+    } else {
+      showGate();
+    }
+  });
+})();
 
 (() => {
   const bgCanvas = document.getElementById("bg-sand");
