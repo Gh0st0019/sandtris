@@ -1270,3 +1270,44 @@ body::before {
 .is-playing .top-bar {
   display: grid;
 }
+
+@media (min-width: 900px) {
+  :root {
+    --board-width: min(46vw, 60dvh, 520px);
+  }
+
+  .app {
+    width: min(100%, 820px);
+  }
+
+  .board-panel {
+    grid-template-columns: var(--board-width) minmax(140px, 200px);
+    grid-template-areas:
+      "top top"
+      "board tray";
+    align-items: start;
+    justify-content: center;
+    column-gap: 18px;
+    row-gap: 12px;
+    width: min(100%, calc(var(--board-width) + 220px));
+  }
+
+  .top-bar {
+    grid-area: top;
+  }
+
+  .board-frame {
+    grid-area: board;
+  }
+
+  .mobile-tray {
+    grid-area: tray;
+    width: min(200px, 26vw);
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .is-playing .mobile-tray {
+    margin-top: 0;
+  }
+}
