@@ -4,7 +4,7 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 const DAILY_TOPIC = "daily-reminder";
-const APP_URL = "https://worlde.online";
+const APP_URL = "https://sandtris.fun";
 const DEFAULT_NOTIFICATION = {
   title: "Sandtris",
   body: "Torna a giocare: il record ti aspetta.",

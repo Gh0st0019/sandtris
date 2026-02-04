@@ -378,11 +378,10 @@ function loadSavedToken() {
       registerPushToken(token);
     }
     updateNotifyStatus("Notifiche: attive", true);
-    hideNotifyPopup();
   } else {
     updateNotifyStatus("Notifiche: disattivate", false);
-    showNotifyPopup();
   }
+  hideNotifyPopup();
 }
 
 function showNotifyPopup() {
@@ -466,6 +465,24 @@ async function enableNotifications() {
   } catch {
     updateNotifyStatus("Errore durante l'attivazione", false);
   }
+}
+
+function isStandaloneMode() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true
+  );
+}
+
+function autoPromptNotifications() {
+  if (!("Notification" in window)) return;
+  if (!isStandaloneMode()) return;
+  if (Notification.permission === "granted") {
+    if (!localStorage.getItem(PUSH_TOKEN_KEY)) {
+      enableNotifications();
+    }
+    return;
+  }
+  enableNotifications();
 }
 
 async function registerPushToken(token) {
@@ -1950,6 +1967,7 @@ showMenu();
 updateHud();
 syncHudExitButton();
 loadSavedToken();
+setTimeout(autoPromptNotifications, 500);
 requestAnimationFrame(loop);
 
 if ("serviceWorker" in navigator) {
@@ -2010,7 +2028,7 @@ if (tutorialSkipBtn) {
   if (isIos()) {
     if (installHint) {
       installHint.textContent =
-        "Su iPhone/iPad: tocca Condividi e scegli “Aggiungi a schermata Home”.";
+        "Su iPhone/iPad: tocca Condividi e scegli “Aggiungi alla schermata Home”.";
     }
     showGate();
   } else {
