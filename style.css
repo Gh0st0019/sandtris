@@ -168,6 +168,7 @@ input {
 .stage {
   display: grid;
   grid-template-columns: minmax(150px, 220px) minmax(0, 1fr) minmax(150px, 220px);
+  grid-template-areas: "side board right";
   gap: 14px;
   align-items: center;
 }
@@ -176,7 +177,7 @@ input {
   display: grid;
   gap: 12px;
   justify-items: center;
-  grid-column: 2;
+  grid-area: board;
 }
 
 .top-bar {
@@ -806,7 +807,7 @@ input {
   transform: translateY(6px);
   pointer-events: none;
   transition: opacity 220ms ease, transform 220ms ease;
-  grid-column: 1;
+  grid-area: side;
   align-content: start;
 }
 
@@ -817,7 +818,7 @@ input {
   transform: translateY(6px);
   pointer-events: none;
   transition: opacity 220ms ease, transform 220ms ease;
-  grid-column: 3;
+  grid-area: right;
   align-content: start;
   justify-items: center;
   margin-top: 18px;
@@ -1010,9 +1011,55 @@ input {
 }
 
 
-@media (min-width: 900px) {
+@media (min-width: 1200px) {
   :root {
-    --board-width: min(36vw, 300px, 28vh);
+    --board-width: min(46vw, 42dvh, 460px);
+  }
+
+  .app {
+    width: min(100%, 1280px);
+  }
+
+  .stage {
+    grid-template-columns: minmax(190px, 260px) minmax(0, 1fr) minmax(170px, 260px);
+    gap: 18px;
+  }
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --board-width: min(70vw, 44dvh, 420px);
+  }
+
+  .stage {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "board board"
+      "side right";
+    align-items: start;
+  }
+
+  .board-panel {
+    width: 100%;
+  }
+
+  .right-panel {
+    margin-top: 0;
+  }
+
+  .is-playing .top-bar {
+    display: grid;
+  }
+}
+
+@media (max-width: 768px) {
+  .stage {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "board"
+      "side"
+      "right";
+    align-items: start;
   }
 }
 
@@ -1097,6 +1144,7 @@ input {
 
   .stage {
     grid-template-columns: 1fr;
+    grid-template-areas: "board";
     align-items: start;
     gap: 10px;
   }
@@ -1107,7 +1155,7 @@ input {
   }
 
   .board-panel {
-    grid-column: auto;
+    grid-area: board;
     order: 1;
     width: 100%;
     gap: 10px;

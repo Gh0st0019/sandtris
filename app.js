@@ -45,7 +45,8 @@ const H_STEP = BLOCK;
 const BASE_DROP = 380;
 const MIN_DROP = 60;
 const CLEAR_THRESHOLD = 0.9;
-const SAND_STEPS = window.innerWidth < 520 ? 2 : 3;
+const MOBILE_QUERY = window.matchMedia("(max-width: 520px)");
+const SAND_STEPS = MOBILE_QUERY.matches ? 2 : 3;
 const SAND_SLIDE_CHANCE = 0.008;
 const SAND_FALL2_CHANCE = 0.08;
 
