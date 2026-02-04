@@ -965,6 +965,11 @@ input {
   pointer-events: auto;
 }
 
+.is-playing .mobile-tray {
+  display: grid;
+  margin-top: 12px;
+}
+
 @keyframes title-wave {
   0% {
     transform: translate(-6px, 0);
@@ -1186,7 +1191,6 @@ input {
   }
 
   .is-playing .mobile-tray {
-    display: grid;
     margin-top: 16px;
   }
 

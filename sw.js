@@ -1,4 +1,4 @@
-const CACHE_NAME = "sandtris-v20260204-01";
+const CACHE_NAME = "sandtris-v20260204-02";
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCs669r3JZNH7vhnMtvHo_5TfQHIwYyHdM",
   authDomain: "sandtris-81990.firebaseapp.com",
@@ -15,9 +15,9 @@ const DEFAULT_NOTIFICATION = {
 const ASSETS = [
   "./",
   "./index.html",
-  "./style.css?v=20260204-01",
-  "./app.js?v=20260204-01",
-  "./manifest.webmanifest?v=20260204-01",
+  "./style.css?v=20260204-02",
+  "./app.js?v=20260204-02",
+  "./manifest.webmanifest?v=20260204-02",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
   "./assets/maskable-icon.png",
@@ -63,6 +63,22 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const accept = event.request.headers.get("accept") || "";
+  const isHtml = event.request.mode === "navigate" || accept.includes("text/html");
+  if (isHtml) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() =>
+          caches.match(event.request).then((cached) => cached || caches.match("./"))
+        )
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
