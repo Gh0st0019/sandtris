@@ -326,15 +326,18 @@ input {
 }
 
 .tray-slot {
+  position: relative;
   aspect-ratio: 1 / 1;
   border: 3px solid #1b103d;
   background-image:
     linear-gradient(var(--frame-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--frame-grid) 1px, transparent 1px),
-    linear-gradient(180deg, #20144c, #160f36);
-  background-size: 25% 25%, 25% 25%, 100% 100%;
-  background-position: -1px -1px, -1px -1px, 0 0;
-  box-shadow: 0 6px 0 #120b2c;
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.12), transparent 50%),
+    linear-gradient(180deg, #22145a, #140e34);
+  background-size: 20% 20%, 20% 20%, 100% 100%, 100% 100%;
+  background-position: -1px -1px, -1px -1px, 0 0, 0 0;
+  box-shadow: 0 6px 0 #120b2c, inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 -6px 0 rgba(0, 0, 0, 0.25);
   display: grid;
   place-items: center;
   padding: 0;
@@ -342,6 +345,19 @@ input {
   touch-action: none;
   border-radius: var(--radius-md);
   overflow: hidden;
+}
+
+.tray-slot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 10px 10px;
+  opacity: 0.18;
+  mix-blend-mode: screen;
+  pointer-events: none;
 }
 
 .tray-slot canvas {
@@ -355,7 +371,7 @@ input {
   content: "";
   position: absolute;
   inset: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: calc(var(--radius-md) - 6px);
   pointer-events: none;
 }

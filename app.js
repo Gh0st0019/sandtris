@@ -98,15 +98,15 @@ const matchMask = new Uint8Array(GRID_W * GRID_H);
 const matchVisited = new Uint8Array(GRID_W * GRID_H);
 
 for (let i = 0; i < grain.length; i++) {
-  grain[i] = (Math.random() * 18 - 9) | 0;
+  grain[i] = (Math.random() * 30 - 15) | 0;
 }
 
 for (let i = 0; i < grainTint.length; i++) {
-  grainTint[i] = (Math.random() * 16 - 8) | 0;
+  grainTint[i] = (Math.random() * 22 - 11) | 0;
 }
 
 for (let y = 0; y < GRID_H; y++) {
-  rowShade[y] = ((y / GRID_H) * 18 - 9) | 0;
+  rowShade[y] = ((y / GRID_H) * 24 - 12) | 0;
 }
 
 const PALETTE = [
@@ -1448,7 +1448,8 @@ function renderPiece(color, offsetY, flashing) {
     const idx = (gy * GRID_W + gx) * 4;
     const bevel = lx === 0 || ly === 0 ? 14 : lx === BLOCK - 1 || ly === BLOCK - 1 ? -10 : 0;
     const sparkle = ((frame + gx + gy) & 7) === 0 ? 4 : 0;
-    const shade = flashOn ? 0 : bevel + sparkle;
+    const pixel = ((gx + gy) & 1) === 0 ? 2 : -2;
+    const shade = flashOn ? 0 : bevel + sparkle + pixel;
     ctxData[idx] = clamp(baseColor[0] + shade, 0, 255);
     ctxData[idx + 1] = clamp(baseColor[1] + shade, 0, 255);
     ctxData[idx + 2] = clamp(baseColor[2] + shade, 0, 255);
@@ -1472,9 +1473,11 @@ function render() {
       const matchFlash = matchedColor && Math.floor(matchTimer / MATCH_FLASH_INTERVAL) % 2 === 0;
       const base = matchFlash ? [245, 245, 245] : PALETTE[colorIndex];
       const grainN = colorIndex === 0 ? (grain[index] >> 1) : grain[index];
-      const grit = colorIndex ? (grain[index] > 5 ? -7 : grain[index] < -5 ? 7 : 0) : 0;
-      const dither = (x + y + ((frame >> 2) & 1)) & 1 ? 2 : -2;
-      const sparkle = ((frame + index) & 7) === 0 ? 2 : 0;
+      const grit = colorIndex ? (grain[index] > 7 ? -10 : grain[index] < -7 ? 10 : 0) : 0;
+      const dither = (x + y + ((frame >> 2) & 1)) & 1 ? 3 : -3;
+      const sparkle = ((frame + index) & 7) === 0 ? 3 : 0;
+      const pixel = colorIndex ? (((index * 13 + (index >> 3)) & 7) - 3) : 0;
+      const stipple = colorIndex && ((x ^ y ^ (index >> 4)) & 3) === 0 ? -4 : 0;
       const motion = moved[index] ? 10 : 0;
       const fallBoost = moved[index] ? (y < GRID_H * 0.35 ? 10 : 6) : 0;
       let surface = 0;
@@ -1489,7 +1492,8 @@ function render() {
       }
       const tint = matchFlash ? 0 : grainTint[index];
       const warm = colorIndex && colorIndex <= 2 ? 3 : 0;
-      const shade = matchFlash ? 0 : grainN + grit + dither + sparkle + rowN + motion + fallBoost + surface;
+      const shade =
+        matchFlash ? 0 : grainN + grit + dither + sparkle + pixel + stipple + rowN + motion + fallBoost + surface;
       const offset = index * 4;
       ctxData[offset] = clamp(base[0] + shade + warm + tint, 0, 255);
       ctxData[offset + 1] = clamp(base[1] + shade + (warm >> 1) - (tint >> 2), 0, 255);
