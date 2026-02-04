@@ -31,6 +31,7 @@ const installGate = document.getElementById("install-gate");
 const installBtn = document.getElementById("install-btn");
 const installHint = document.getElementById("install-hint");
 const langButtons = Array.from(document.querySelectorAll("[data-lang]"));
+const gmailLink = document.querySelector(".gmail-link");
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -304,6 +305,29 @@ function initLanguage() {
     btn.addEventListener("click", () => {
       applyLanguage(btn.dataset.lang);
     });
+  });
+}
+
+function initGmailLink() {
+  if (!gmailLink) return;
+  const to = "support@sandtris.fun";
+  const ua = navigator.userAgent.toLowerCase();
+  const isIos = /iphone|ipad|ipod/.test(ua);
+  const isAndroid = /android/.test(ua);
+  gmailLink.addEventListener("click", (event) => {
+    if (!isIos && !isAndroid) return;
+    event.preventDefault();
+    if (isIos) {
+      window.location.href = `googlegmail://co?to=${encodeURIComponent(to)}`;
+    } else if (isAndroid) {
+      const intent = `intent://compose?to=${encodeURIComponent(
+        to
+      )}#Intent;scheme=googlegmail;package=com.google.android.gm;end`;
+      window.location.href = intent;
+    }
+    setTimeout(() => {
+      window.location.href = `mailto:${encodeURIComponent(to)}`;
+    }, 650);
   });
 }
 
@@ -2241,6 +2265,7 @@ function loop(time) {
 }
 
 initLanguage();
+initGmailLink();
 renderLeaderboard(loadLeaderboard());
 showMenu();
 updateHud();
