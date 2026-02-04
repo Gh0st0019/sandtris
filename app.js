@@ -1979,3 +1979,210 @@ if (tutorialSkipBtn) {
     endTutorial();
   });
 }
+
+(() => {
+  const bgCanvas = document.getElementById("bg-sand");
+  if (!bgCanvas) return;
+  const bgCtx = bgCanvas.getContext("2d", { alpha: true });
+  if (!bgCtx) return;
+
+  const palette = PALETTE.map((color) => `rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+  const types = Object.keys(PIECE_DEFS);
+  const colorIndices = COLOR_INDICES.slice();
+  const maxParticles = 900;
+  const cycleDuration = 16000;
+  const spawnInterval = 1300;
+  const gravity = 90;
+
+  let width = 0;
+  let height = 0;
+  let floorY = 0;
+  let cellSize = 10;
+  let grainSize = 2;
+  let lastSpawn = performance.now();
+  let cycleStart = performance.now();
+  let lastTime = performance.now();
+  let blocks = [];
+  let particles = [];
+  let clearedWhileHidden = false;
+
+  function getCellsBounds(cells) {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const cell of cells) {
+      minX = Math.min(minX, cell[0]);
+      minY = Math.min(minY, cell[1]);
+      maxX = Math.max(maxX, cell[0]);
+      maxY = Math.max(maxY, cell[1]);
+    }
+    return {
+      minX,
+      minY,
+      maxX,
+      maxY,
+      width: maxX - minX + 1,
+      height: maxY - minY + 1,
+    };
+  }
+
+  function resizeBackground() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    bgCanvas.width = Math.floor(width * dpr);
+    bgCanvas.height = Math.floor(height * dpr);
+    bgCanvas.style.width = `${width}px`;
+    bgCanvas.style.height = `${height}px`;
+    bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    floorY = Math.round(height * 0.78);
+    cellSize = Math.max(8, Math.round(Math.min(width, height) / 36));
+    grainSize = Math.max(2, Math.round(cellSize / 4));
+  }
+
+  function spawnBlock() {
+    const type = types[(Math.random() * types.length) | 0];
+    const rot = (Math.random() * 4) | 0;
+    const cells = rotations[type][rot];
+    const bounds = getCellsBounds(cells);
+    const color = colorIndices[(Math.random() * colorIndices.length) | 0];
+    const pieceWidth = bounds.width * cellSize;
+    const x =
+      Math.max(18, Math.random() * (width - pieceWidth - 36)) + Math.max(12, (width - pieceWidth) * 0.1);
+    blocks.push({
+      type,
+      rot,
+      cells,
+      minX: bounds.minX,
+      minY: bounds.minY,
+      width: pieceWidth,
+      height: bounds.height * cellSize,
+      x,
+      y: -bounds.height * cellSize - 40,
+      speed: 30 + Math.random() * 50,
+      color,
+    });
+  }
+
+  function spawnParticles(block) {
+    const baseColor = block.color;
+    for (const cell of block.cells) {
+      const baseX = block.x + (cell[0] - block.minX) * cellSize;
+      const baseY = block.y + (cell[1] - block.minY) * cellSize;
+      for (let i = 0; i < 8; i++) {
+        particles.push({
+          x: baseX + Math.random() * cellSize,
+          y: baseY + Math.random() * cellSize,
+          vx: (Math.random() - 0.5) * 30,
+          vy: -Math.random() * 30,
+          color: baseColor,
+          life: 2.6 + Math.random() * 1.8,
+        });
+      }
+    }
+  }
+
+  function resetScene() {
+    blocks = [];
+    particles = [];
+    cycleStart = performance.now();
+    lastSpawn = cycleStart;
+  }
+
+  function updateScene(dt, now) {
+    if (now - cycleStart > cycleDuration || particles.length > maxParticles) {
+      resetScene();
+    }
+    if (now - lastSpawn > spawnInterval && blocks.length < 3) {
+      spawnBlock();
+      lastSpawn = now;
+    }
+
+    blocks = blocks.filter((block) => {
+      block.y += block.speed * dt;
+      if (block.y + block.height >= floorY) {
+        block.y = floorY - block.height;
+        spawnParticles(block);
+        return false;
+      }
+      return true;
+    });
+
+    const damp = 0.4;
+    particles = particles.filter((grain) => {
+      grain.vy += gravity * dt;
+      grain.x += grain.vx * dt;
+      grain.y += grain.vy * dt;
+      if (grain.y >= floorY) {
+        grain.y = floorY;
+        grain.vy = 0;
+        grain.vx *= damp;
+      }
+      grain.life -= dt;
+      return grain.life > 0;
+    });
+
+    if (particles.length > maxParticles) {
+      particles.splice(0, particles.length - maxParticles);
+    }
+  }
+
+  function drawScene() {
+    bgCtx.clearRect(0, 0, width, height);
+    if (!width || !height) return;
+
+    bgCtx.save();
+    bgCtx.globalAlpha = 0.65;
+    for (const block of blocks) {
+      const base = palette[block.color];
+      for (const cell of block.cells) {
+        const px = block.x + (cell[0] - block.minX) * cellSize;
+        const py = block.y + (cell[1] - block.minY) * cellSize;
+        bgCtx.fillStyle = base;
+        bgCtx.fillRect(px, py, cellSize, cellSize);
+        bgCtx.fillStyle = "rgba(255, 255, 255, 0.18)";
+        bgCtx.fillRect(px + 1, py + 1, cellSize - 2, Math.max(1, Math.round(cellSize * 0.32)));
+        bgCtx.fillStyle = "rgba(0, 0, 0, 0.25)";
+        bgCtx.fillRect(
+          px + 1,
+          py + cellSize - Math.max(2, Math.round(cellSize * 0.18)),
+          cellSize - 2,
+          Math.max(2, Math.round(cellSize * 0.18))
+        );
+      }
+    }
+    bgCtx.restore();
+
+    bgCtx.save();
+    bgCtx.globalAlpha = 0.7;
+    for (const grain of particles) {
+      bgCtx.fillStyle = palette[grain.color];
+      bgCtx.fillRect(grain.x, grain.y, grainSize, grainSize);
+    }
+    bgCtx.restore();
+  }
+
+  function tickBackground(time) {
+    const menuActive = !document.body.classList.contains("is-playing");
+    if (!menuActive) {
+      if (!clearedWhileHidden) {
+        bgCtx.clearRect(0, 0, width, height);
+        clearedWhileHidden = true;
+      }
+      lastTime = time;
+      requestAnimationFrame(tickBackground);
+      return;
+    }
+    clearedWhileHidden = false;
+    const dt = Math.min(0.05, (time - lastTime) / 1000);
+    lastTime = time;
+    updateScene(dt, time);
+    drawScene();
+    requestAnimationFrame(tickBackground);
+  }
+
+  resizeBackground();
+  window.addEventListener("resize", resizeBackground);
+  requestAnimationFrame(tickBackground);
+})();
