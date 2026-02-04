@@ -66,6 +66,8 @@ const AUDIO_MASTER_GAIN = 0.22;
 const MATCH_CLEAR_RATE = 0.45;
 const CLEANUP_INTERVAL = 2600;
 const CLEANUP_MAX_CLUSTER = 3;
+const CLEANUP_MAX_ISLAND = 6;
+const CLEANUP_DOMINANCE = 0.72;
 const PUSH_TOKEN_KEY = "sandtris_push_token";
 const FUNCTIONS_BASE_URL = "https://us-central1-sandtris-81990.cloudfunctions.net";
 const FIREBASE_CONFIG = {
@@ -1400,13 +1402,19 @@ function cleanupIsolatedPixels() {
     if (!color || visited[seed]) continue;
     const stack = [seed];
     const cluster = [];
+    const neighborCounts = {};
+    let neighborTotal = 0;
+    let edgeTouch = false;
+    let emptyNeighbor = 0;
     visited[seed] = 1;
     while (stack.length) {
       const idx = stack.pop();
       cluster.push(idx);
-      if (cluster.length > CLEANUP_MAX_CLUSTER) break;
       const x = idx % GRID_W;
       const y = (idx / GRID_W) | 0;
+      if (x === 0 || x === GRID_W - 1 || y === 0 || y === GRID_H - 1) {
+        edgeTouch = true;
+      }
       const neighbors = [];
       if (x > 0) neighbors.push(idx - 1);
       if (x < GRID_W - 1) neighbors.push(idx + 1);
@@ -1419,14 +1427,41 @@ function cleanupIsolatedPixels() {
         if (x < GRID_W - 1 && y < GRID_H - 1) neighbors.push(idx + GRID_W + 1);
       }
       for (const n of neighbors) {
-        if (!visited[n] && grid[n] === color) {
-          visited[n] = 1;
-          stack.push(n);
+        const nColor = grid[n];
+        if (nColor === color) {
+          if (!visited[n]) {
+            visited[n] = 1;
+            stack.push(n);
+          }
+        } else {
+          neighborTotal += 1;
+          if (nColor === 0) {
+            emptyNeighbor += 1;
+          } else {
+            neighborCounts[nColor] = (neighborCounts[nColor] || 0) + 1;
+          }
         }
       }
     }
+
     if (cluster.length <= CLEANUP_MAX_CLUSTER) {
       toClear.push(...cluster);
+      continue;
+    }
+
+    if (cluster.length <= CLEANUP_MAX_ISLAND && !edgeTouch && neighborTotal > 0 && emptyNeighbor === 0) {
+      let dominantColor = 0;
+      let dominantCount = 0;
+      for (const key of Object.keys(neighborCounts)) {
+        const count = neighborCounts[key];
+        if (count > dominantCount) {
+          dominantCount = count;
+          dominantColor = Number(key);
+        }
+      }
+      if (dominantColor && dominantCount / neighborTotal >= CLEANUP_DOMINANCE) {
+        toClear.push(...cluster);
+      }
     }
   }
   if (toClear.length === 0) return;
