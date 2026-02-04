@@ -64,6 +64,7 @@ const MATCH_USE_DIAGONALS = true;
 const MATCH_EDGE_TOLERANCE = 1;
 const AUDIO_MASTER_GAIN = 0.22;
 const MATCH_CLEAR_RATE = 0.45;
+const CLEANUP_INTERVAL = 2600;
 const PUSH_TOKEN_KEY = "sandtris_push_token";
 const FUNCTIONS_BASE_URL = "https://us-central1-sandtris-81990.cloudfunctions.net";
 const FIREBASE_CONFIG = {
@@ -295,6 +296,7 @@ let matchClearAccumulator = 0;
 let matchClearTotal = 0;
 let matchClearSumX = 0;
 let matchClearSumY = 0;
+let cleanupTimer = 0;
 
 let score = 0;
 let lines = 0;
@@ -1389,9 +1391,41 @@ function isOverflowed() {
   return false;
 }
 
+function cleanupIsolatedPixels() {
+  const toClear = [];
+  for (let idx = 0; idx < grid.length; idx++) {
+    const color = grid[idx];
+    if (!color) continue;
+    const x = idx % GRID_W;
+    const y = (idx / GRID_W) | 0;
+    let hasNeighbor = false;
+    if (x > 0 && grid[idx - 1] === color) hasNeighbor = true;
+    if (!hasNeighbor && x < GRID_W - 1 && grid[idx + 1] === color) hasNeighbor = true;
+    if (!hasNeighbor && y > 0 && grid[idx - GRID_W] === color) hasNeighbor = true;
+    if (!hasNeighbor && y < GRID_H - 1 && grid[idx + GRID_W] === color) hasNeighbor = true;
+    if (!hasNeighbor && MATCH_USE_DIAGONALS) {
+      if (x > 0 && y > 0 && grid[idx - GRID_W - 1] === color) hasNeighbor = true;
+      if (!hasNeighbor && x < GRID_W - 1 && y > 0 && grid[idx - GRID_W + 1] === color)
+        hasNeighbor = true;
+      if (!hasNeighbor && x > 0 && y < GRID_H - 1 && grid[idx + GRID_W - 1] === color)
+        hasNeighbor = true;
+      if (!hasNeighbor && x < GRID_W - 1 && y < GRID_H - 1 && grid[idx + GRID_W + 1] === color)
+        hasNeighbor = true;
+    }
+    if (!hasNeighbor) {
+      toClear.push(idx);
+    }
+  }
+  if (toClear.length === 0) return;
+  for (const idx of toClear) {
+    grid[idx] = 0;
+  }
+}
+
 function update(dt) {
   windPhase += dt * 0.0009;
   wind = Math.sin(windPhase) * WIND_FACTOR;
+  cleanupTimer += dt;
 
   if (piece) {
     if (pieceState === "active") {
@@ -1458,6 +1492,19 @@ function update(dt) {
 
   if (!gameOver && !matchActive && isOverflowed()) {
     endGame();
+  }
+
+  if (cleanupTimer >= CLEANUP_INTERVAL) {
+    cleanupTimer = 0;
+    if (
+      pieceState === "idle" &&
+      !matchActive &&
+      !matchClearing &&
+      !dragging &&
+      settleSteps === 0
+    ) {
+      cleanupIsolatedPixels();
+    }
   }
 }
 
