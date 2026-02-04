@@ -90,6 +90,61 @@ body::after {
   opacity: 0.45;
 }
 
+.lang-switch {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 12;
+  display: flex;
+  gap: 8px;
+}
+
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 2px solid #1b103d;
+  background: #2a1b66;
+  color: #f5f3ff;
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 0 #120b2c;
+}
+
+.lang-btn--active {
+  border-color: #f2c57c;
+  color: #ffd666;
+  box-shadow: 0 4px 0 #8a5a1c;
+}
+
+.flag {
+  width: 20px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  image-rendering: pixelated;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.flag--ita {
+  background: linear-gradient(90deg, #2aa24a 0 33%, #f5f5f5 33% 66%, #d73a3a 66% 100%);
+}
+
+.flag--eng {
+  background:
+    linear-gradient(90deg, transparent 42%, #d5232f 42% 58%, transparent 58%),
+    linear-gradient(0deg, transparent 42%, #d5232f 42% 58%, transparent 58%),
+    #f5f5f5;
+}
+
+.is-playing .lang-switch {
+  display: none;
+}
+
 .install-gate {
   position: fixed;
   inset: 0;

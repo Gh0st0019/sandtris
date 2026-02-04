@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>Sandtris</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260204-18" />
+    <link rel="manifest" href="manifest.webmanifest?v=20260204-19" />
     <meta name="theme-color" content="#4b34b9" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -14,41 +14,53 @@
     <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
     <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
-    <link rel="stylesheet" href="style.css?v=20260204-18" />
+    <link rel="stylesheet" href="style.css?v=20260204-19" />
   </head>
   <body>
     <canvas class="bg-sand" id="bg-sand" aria-hidden="true"></canvas>
     <div class="install-gate install-gate--hidden" id="install-gate" aria-hidden="true">
       <div class="install-gate__card">
-        <div class="install-gate__title">Aggiungi Sandtris alla schermata Home</div>
-        <p class="install-gate__text">
+        <div class="install-gate__title" data-i18n="install.title">
+          Aggiungi Sandtris alla schermata Home
+        </div>
+        <p class="install-gate__text" data-i18n="install.text">
           L'app funziona meglio quando è installata. È veloce, a schermo intero e pronta a
           giocare.
         </p>
-        <button class="install-gate__btn" id="install-btn" type="button">
+        <button class="install-gate__btn" id="install-btn" type="button" data-i18n="install.button">
           Aggiungi alla schermata Home
         </button>
         <p class="install-gate__hint" id="install-hint"></p>
       </div>
+    </div>
+    <div class="lang-switch" aria-label="Language">
+      <button class="lang-btn" type="button" data-lang="en" aria-label="English">
+        <span class="flag flag--eng" aria-hidden="true"></span>
+        <span>ENG</span>
+      </button>
+      <button class="lang-btn" type="button" data-lang="it" aria-label="Italiano">
+        <span class="flag flag--ita" aria-hidden="true"></span>
+        <span>ITA</span>
+      </button>
     </div>
     <div class="app">
       <main class="stage">
         <aside class="side-panel">
           <div class="stats stats--stack">
             <div class="stat">
-              <span class="label">Score</span>
+              <span class="label" data-i18n="label.score">Score</span>
               <span id="score">0</span>
             </div>
             <div class="stat">
-              <span class="label">Linee</span>
+              <span class="label" data-i18n="label.lines">Linee</span>
               <span id="lines">0</span>
             </div>
           </div>
           <div class="leaderboard">
-            <div class="leaderboard-title">Weekly Leaderboard</div>
+            <div class="leaderboard-title" data-i18n="leaderboard.title">Weekly Leaderboard</div>
             <div class="leaderboard-list" id="leaderboard-list"></div>
             <div class="leaderboard-rank">
-              <div class="rank-title">Your Rank</div>
+              <div class="rank-title" data-i18n="leaderboard.rank">Your Rank</div>
               <div class="rank-value" id="rank-value">-</div>
               <div class="rank-score" id="rank-score">-</div>
             </div>
@@ -61,7 +73,7 @@
               <button class="hud-icon hud-icon--gear" type="button" aria-label="Menu" data-menu="menu"></button>
               <div class="hud-pill">
                 <span class="hud-icon hud-icon--crown" aria-hidden="true"></span>
-                <span class="hud-label">Best</span>
+                <span class="hud-label" data-i18n="hud.best">Best</span>
                 <span id="best-top">0</span>
               </div>
               <div class="hud-pill">
@@ -82,42 +94,43 @@
                   <div class="start-logo">SANDTRIS</div>
                   <div class="start-crown">
                     <span class="start-crown-icon" aria-hidden="true"></span>
-                    <span class="start-best-label">BEST</span>
+                    <span class="start-best-label" data-i18n="hud.best">BEST</span>
                     <span id="menu-best">0</span>
                   </div>
-                  <button class="start-play" data-menu="start">PLAY</button>
+                  <button class="start-play" data-menu="start" data-i18n="start.play">PLAY</button>
                   <div class="start-actions">
-                    <button class="start-secondary" data-menu="settings">SETTINGS</button>
-                    <button class="start-secondary" data-menu="about">ABOUT</button>
+                    <button class="start-secondary" data-menu="settings" data-i18n="start.settings">SETTINGS</button>
+                    <button class="start-secondary" data-menu="about" data-i18n="start.about">ABOUT</button>
                   </div>
                 </div>
               </div>
               <div class="overlay-card">
                 <div class="overlay-screen overlay-screen--settings">
-                <div class="menu-kicker">SETTINGS</div>
-                <p class="menu-text">Attiva le notifiche per ricevere il reminder giornaliero.</p>
+                <div class="menu-kicker" data-i18n="menu.settings">SETTINGS</div>
+                <p class="menu-text" data-i18n="menu.settings.text">Attiva le notifiche per ricevere il reminder giornaliero.</p>
                 <div class="menu-actions">
-                  <button class="menu-btn menu-btn--about" data-menu="back">BACK</button>
+                  <button class="menu-btn menu-btn--about" data-menu="back" data-i18n="menu.back">BACK</button>
                 </div>
-                <p class="menu-text menu-text--hint" id="notify-status">Notifiche: disattivate</p>
-                <p class="menu-text menu-text--hint">iOS: aggiungi alla schermata Home per riceverle.</p>
+                <p class="menu-text menu-text--hint" id="notify-status" data-i18n="notify.status.disabled">Notifiche: disattivate</p>
+                <p class="menu-text menu-text--hint" data-i18n="notify.ios.hint">iOS: aggiungi alla schermata Home per riceverle.</p>
               </div>
                 <div class="overlay-screen overlay-screen--about">
-                  <div class="menu-kicker">ABOUT</div>
-                  <p class="menu-text">
+                  <div class="menu-kicker" data-i18n="menu.about">ABOUT</div>
+                  <p class="menu-text" data-i18n="menu.about.text">
                     Sandtris unisce tetromini e sabbia reale. Ogni blocco si smaterializza in
-                    granuli con un effetto arcade. Pensato per mobile.
+                    granuli con un effetto arcade. Ideato da Ch3rry, che cura Graphic Design,
+                    UI/UX, Game Design, Development, Sound Design e VFX.
                   </p>
                   <div class="menu-actions">
-                    <button class="menu-btn menu-btn--start" data-menu="back">BACK</button>
+                    <button class="menu-btn menu-btn--start" data-menu="back" data-i18n="menu.back">BACK</button>
                   </div>
                 </div>
                 <div class="overlay-screen overlay-screen--message">
                   <div class="menu-kicker" id="overlay-title">PAUSA</div>
                   <p class="menu-text" id="overlay-text">Tocca per riprendere</p>
                   <div class="menu-actions">
-                    <button class="menu-btn menu-btn--start" data-menu="resume">RESUME</button>
-                    <button class="menu-btn menu-btn--about" data-menu="menu">MENU</button>
+                    <button class="menu-btn menu-btn--start" data-menu="resume" data-i18n="menu.resume">RESUME</button>
+                    <button class="menu-btn menu-btn--about" data-menu="menu" data-i18n="menu.menu">MENU</button>
                   </div>
                 </div>
               </div>
@@ -137,40 +150,40 @@
         </section>
         <aside class="right-panel">
           <div class="mini-card">
-            <div class="mini-title">Next</div>
+            <div class="mini-title" data-i18n="next.title">Next</div>
             <canvas id="next" width="72" height="72"></canvas>
           </div>
         </aside>
       </main>
     </div>
-    <footer class="credit">Made with ❤️ by Ch3rry</footer>
+    <footer class="credit" data-i18n="credit">Made with ❤️ by Ch3rry</footer>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
     <div class="tutorial" id="tutorial" aria-hidden="true">
       <div class="tutorial__spotlight" id="tutorial-spotlight"></div>
       <div class="tutorial__card" role="dialog" aria-live="polite">
-        <div class="tutorial__kicker">TUTORIAL</div>
+        <div class="tutorial__kicker" data-i18n="tutorial.kicker">TUTORIAL</div>
         <div class="tutorial__title" id="tutorial-title">Benvenuto</div>
         <p class="tutorial__text" id="tutorial-text"></p>
         <div class="tutorial__progress" id="tutorial-progress">1/3</div>
         <div class="tutorial__actions">
-          <button class="menu-btn menu-btn--about" type="button" id="tutorial-skip">SALTA</button>
+          <button class="menu-btn menu-btn--about" type="button" id="tutorial-skip" data-i18n="tutorial.skip">SALTA</button>
           <button class="menu-btn menu-btn--start" type="button" id="tutorial-next">AVANTI</button>
         </div>
       </div>
     </div>
     <div class="notify-popup" id="notify-popup" aria-hidden="true">
       <div class="notify-popup__card">
-        <div class="menu-kicker">NOTIFICHE</div>
-        <p class="menu-text" id="notify-popup-text">
+        <div class="menu-kicker" data-i18n="notify.kicker">NOTIFICHE</div>
+        <p class="menu-text" id="notify-popup-text" data-i18n="notify.popup">
           Attiva le notifiche per ricevere promemoria e tornare a giocare.
         </p>
         <div class="menu-actions">
-          <button class="menu-btn menu-btn--start" type="button" id="notify-popup-btn">ATTIVA</button>
-          <button class="menu-btn menu-btn--about" type="button" id="notify-popup-close">NON ORA</button>
+          <button class="menu-btn menu-btn--start" type="button" id="notify-popup-btn" data-i18n="notify.enable">ATTIVA</button>
+          <button class="menu-btn menu-btn--about" type="button" id="notify-popup-close" data-i18n="notify.later">NON ORA</button>
         </div>
       </div>
     </div>
-    <script src="app.js?v=20260204-18"></script>
+    <script src="app.js?v=20260204-19"></script>
   </body>
 </html>

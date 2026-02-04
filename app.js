@@ -30,6 +30,7 @@ const tutorialCard = tutorial ? tutorial.querySelector(".tutorial__card") : null
 const installGate = document.getElementById("install-gate");
 const installBtn = document.getElementById("install-btn");
 const installHint = document.getElementById("install-hint");
+const langButtons = Array.from(document.querySelectorAll("[data-lang]"));
 
 const scoreEl = document.getElementById("score");
 const scoreTopEl = document.getElementById("score-top");
@@ -68,6 +69,7 @@ const CLEANUP_INTERVAL = 2600;
 const CLEANUP_MAX_CLUSTER = 3;
 const CLEANUP_MAX_ISLAND = 6;
 const CLEANUP_DOMINANCE = 0.72;
+const LANG_KEY = "sandtris_lang";
 const PUSH_TOKEN_KEY = "sandtris_push_token";
 const FUNCTIONS_BASE_URL = "https://us-central1-sandtris-81990.cloudfunctions.net";
 const FIREBASE_CONFIG = {
@@ -129,6 +131,181 @@ const PALETTE = [
   [214, 70, 190],
   [48, 48, 60],
 ];
+
+const I18N = {
+  it: {
+    "install.title": "Aggiungi Sandtris alla schermata Home",
+    "install.text":
+      "L'app funziona meglio quando è installata. È veloce, a schermo intero e pronta a giocare.",
+    "install.button": "Aggiungi alla schermata Home",
+    "install.hint.ios": "Su iPhone/iPad: tocca Condividi e scegli “Aggiungi alla schermata Home”.",
+    "install.hint.android": "Premi il pulsante per aggiungere l'app alla Home.",
+    "install.hint.manual": "Apri il menu del browser e scegli “Installa app”.",
+    "label.score": "Punteggio",
+    "label.lines": "Linee",
+    "leaderboard.title": "Classifica settimanale",
+    "leaderboard.rank": "La tua posizione",
+    "hud.best": "Best",
+    "start.play": "GIOCA",
+    "start.settings": "IMPOSTAZIONI",
+    "start.about": "INFO",
+    "menu.settings": "IMPOSTAZIONI",
+    "menu.settings.text": "Attiva le notifiche per ricevere il reminder giornaliero.",
+    "menu.back": "INDIETRO",
+    "menu.about": "INFO",
+    "menu.about.text":
+      "Sandtris unisce tetromini e sabbia reale. Ogni blocco si smaterializza in granuli con un effetto arcade. Ideato da Ch3rry, che cura Graphic Design, UI/UX, Game Design, Development, Sound Design e VFX.",
+    "menu.pause.title": "PAUSA",
+    "menu.pause.text": "Tocca per riprendere",
+    "menu.gameover.title": "GAME OVER",
+    "menu.gameover.text": "Tocca START o tap per ricominciare",
+    "menu.resume": "RIPRENDI",
+    "menu.menu": "MENU",
+    "next.title": "Prossimo",
+    "tutorial.kicker": "TUTORIAL",
+    "tutorial.skip": "SALTA",
+    "tutorial.next": "AVANTI",
+    "tutorial.start": "START",
+    "tutorial.step1.title": "Prendi un pezzo",
+    "tutorial.step1.text": "Scegli un blocco dal vassoio e trascinalo nel tabellone.",
+    "tutorial.step2.title": "Muovi e ruota",
+    "tutorial.step2.text": "Tocca per ruotare, trascina per spostare. Swipe in giu per drop veloce.",
+    "tutorial.step3.title": "Fai match",
+    "tutorial.step3.text": "Unisci molti granuli dello stesso colore per fare punti.",
+    "notify.kicker": "NOTIFICHE",
+    "notify.popup": "Attiva le notifiche per ricevere promemoria e tornare a giocare.",
+    "notify.enable": "ATTIVA",
+    "notify.later": "NON ORA",
+    "notify.status.active": "Notifiche: attive",
+    "notify.status.disabled": "Notifiche: disattivate",
+    "notify.status.unsupported": "Notifiche non supportate",
+    "notify.status.unavailable": "Notifiche non disponibili",
+    "notify.status.denied": "Notifiche: permesso negato",
+    "notify.status.sw": "Service worker non pronto",
+    "notify.status.token": "Token non disponibile",
+    "notify.status.error": "Errore durante l'attivazione",
+    "notify.popup.blocked": "Notifiche bloccate. Abilita dalle impostazioni del browser.",
+    "notify.popup.unsupported": "Notifiche non supportate su questo dispositivo.",
+    "notify.popup.base": "Attiva le notifiche per ricevere promemoria e tornare a giocare.",
+    "notify.ios.hint": "iOS: aggiungi alla schermata Home per riceverle.",
+    credit: "Made with ❤️ by Ch3rry",
+  },
+  en: {
+    "install.title": "Add Sandtris to your Home Screen",
+    "install.text": "The app works best when installed. Full screen, fast, and ready to play.",
+    "install.button": "Add to Home Screen",
+    "install.hint.ios": "On iPhone/iPad: tap Share and choose “Add to Home Screen”.",
+    "install.hint.android": "Press the button to add the app to Home.",
+    "install.hint.manual": "Open the browser menu and choose “Install app”.",
+    "label.score": "Score",
+    "label.lines": "Lines",
+    "leaderboard.title": "Weekly Leaderboard",
+    "leaderboard.rank": "Your Rank",
+    "hud.best": "Best",
+    "start.play": "PLAY",
+    "start.settings": "SETTINGS",
+    "start.about": "ABOUT",
+    "menu.settings": "SETTINGS",
+    "menu.settings.text": "Enable notifications to receive the daily reminder.",
+    "menu.back": "BACK",
+    "menu.about": "ABOUT",
+    "menu.about.text":
+      "Sandtris blends tetrominoes with real sand. Each block dissolves into grains with an arcade feel. Created by Ch3rry, responsible for Graphic Design, UI/UX, Game Design, Development, Sound Design, and VFX.",
+    "menu.pause.title": "PAUSE",
+    "menu.pause.text": "Tap to resume",
+    "menu.gameover.title": "GAME OVER",
+    "menu.gameover.text": "Tap START or tap to restart",
+    "menu.resume": "RESUME",
+    "menu.menu": "MENU",
+    "next.title": "Next",
+    "tutorial.kicker": "TUTORIAL",
+    "tutorial.skip": "SKIP",
+    "tutorial.next": "NEXT",
+    "tutorial.start": "START",
+    "tutorial.step1.title": "Pick a piece",
+    "tutorial.step1.text": "Choose a block from the tray and drag it onto the board.",
+    "tutorial.step2.title": "Move and rotate",
+    "tutorial.step2.text": "Tap to rotate, drag to move. Swipe down for a fast drop.",
+    "tutorial.step3.title": "Make matches",
+    "tutorial.step3.text": "Combine lots of grains of the same color to score.",
+    "notify.kicker": "NOTIFICATIONS",
+    "notify.popup": "Enable notifications to get reminders and come back to play.",
+    "notify.enable": "ENABLE",
+    "notify.later": "NOT NOW",
+    "notify.status.active": "Notifications: on",
+    "notify.status.disabled": "Notifications: off",
+    "notify.status.unsupported": "Notifications not supported",
+    "notify.status.unavailable": "Notifications unavailable",
+    "notify.status.denied": "Notifications: permission denied",
+    "notify.status.sw": "Service worker not ready",
+    "notify.status.token": "Token not available",
+    "notify.status.error": "Activation error",
+    "notify.popup.blocked": "Notifications are blocked. Enable them in browser settings.",
+    "notify.popup.unsupported": "Notifications are not supported on this device.",
+    "notify.popup.base": "Enable notifications to get reminders and come back to play.",
+    "notify.ios.hint": "iOS: add to Home Screen to receive them.",
+    credit: "Made with ❤️ by Ch3rry",
+  },
+};
+
+let currentLang = "it";
+let notifyStatusKey = "notify.status.disabled";
+let notifyPopupKey = "notify.popup.base";
+let installHintKey = "";
+let overlayMessageKeys = null;
+
+function t(key) {
+  return I18N[currentLang]?.[key] ?? I18N.it[key] ?? key;
+}
+
+function setNotifyPopupText(key) {
+  notifyPopupKey = key;
+  if (notifyPopupText) {
+    notifyPopupText.textContent = t(key);
+  }
+}
+
+function setInstallHint(key) {
+  installHintKey = key;
+  if (installHint) {
+    installHint.textContent = t(key);
+  }
+}
+
+function applyLanguage(lang) {
+  currentLang = I18N[lang] ? lang : "it";
+  localStorage.setItem(LANG_KEY, currentLang);
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const key = el.dataset.i18n;
+    const value = t(key);
+    if (value !== undefined) {
+      el.textContent = value;
+    }
+  });
+  if (installHintKey) setInstallHint(installHintKey);
+  if (notifyStatusKey) updateNotifyStatus(notifyStatusKey);
+  if (notifyPopupKey) setNotifyPopupText(notifyPopupKey);
+  if (tutorialActive) showTutorialStep();
+  if (overlayMessageKeys && overlay?.dataset?.state === "message") {
+    overlayTitle.textContent = t(overlayMessageKeys.titleKey);
+    overlayText.textContent = t(overlayMessageKeys.textKey);
+  }
+  langButtons.forEach((btn) => {
+    btn.classList.toggle("lang-btn--active", btn.dataset.lang === currentLang);
+  });
+}
+
+function initLanguage() {
+  const saved = localStorage.getItem(LANG_KEY);
+  const browserLang = navigator.language && navigator.language.toLowerCase().startsWith("it") ? "it" : "en";
+  applyLanguage(saved || browserLang);
+  langButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      applyLanguage(btn.dataset.lang);
+    });
+  });
+}
 
 let audioCtx = null;
 let masterGain = null;
@@ -371,9 +548,10 @@ function initFirebaseMessaging() {
   return messaging;
 }
 
-function updateNotifyStatus(message, enabled) {
+function updateNotifyStatus(messageKey) {
+  notifyStatusKey = messageKey;
   if (!notifyStatus) return;
-  notifyStatus.textContent = message;
+  notifyStatus.textContent = t(messageKey);
 }
 
 function loadSavedToken() {
@@ -382,9 +560,9 @@ function loadSavedToken() {
     if (Notification.permission === "granted") {
       registerPushToken(token);
     }
-    updateNotifyStatus("Notifiche: attive", true);
+    updateNotifyStatus("notify.status.active");
   } else {
-    updateNotifyStatus("Notifiche: disattivate", false);
+    updateNotifyStatus("notify.status.disabled");
   }
   hideNotifyPopup();
 }
@@ -392,18 +570,16 @@ function loadSavedToken() {
 function showNotifyPopup() {
   if (!notifyPopup) return;
   const permission = "Notification" in window ? Notification.permission : "unsupported";
-  let message = "Attiva le notifiche per ricevere promemoria e tornare a giocare.";
+  let messageKey = "notify.popup.base";
   let canEnable = true;
   if (permission === "denied") {
-    message = "Notifiche bloccate. Abilita dalle impostazioni del browser.";
+    messageKey = "notify.popup.blocked";
     canEnable = false;
   } else if (permission === "unsupported") {
-    message = "Notifiche non supportate su questo dispositivo.";
+    messageKey = "notify.popup.unsupported";
     canEnable = false;
   }
-  if (notifyPopupText) {
-    notifyPopupText.textContent = message;
-  }
+  setNotifyPopupText(messageKey);
   if (notifyPopupBtn) {
     notifyPopupBtn.disabled = !canEnable;
   }
@@ -436,22 +612,22 @@ async function ensureServiceWorker() {
 
 async function enableNotifications() {
   if (!("Notification" in window)) {
-    updateNotifyStatus("Notifiche non supportate", false);
+    updateNotifyStatus("notify.status.unsupported");
     return;
   }
   initFirebaseMessaging();
   if (!messaging) {
-    updateNotifyStatus("Notifiche non disponibili", false);
+    updateNotifyStatus("notify.status.unavailable");
     return;
   }
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
-    updateNotifyStatus("Notifiche: permesso negato", false);
+    updateNotifyStatus("notify.status.denied");
     return;
   }
   const registration = await ensureServiceWorker();
   if (!registration) {
-    updateNotifyStatus("Service worker non pronto", false);
+    updateNotifyStatus("notify.status.sw");
     return;
   }
   try {
@@ -462,13 +638,13 @@ async function enableNotifications() {
     if (token) {
       localStorage.setItem(PUSH_TOKEN_KEY, token);
       registerPushToken(token);
-      updateNotifyStatus("Notifiche: attive", true);
+      updateNotifyStatus("notify.status.active");
       hideNotifyPopup();
     } else {
-      updateNotifyStatus("Token non disponibile", false);
+      updateNotifyStatus("notify.status.token");
     }
   } catch {
-    updateNotifyStatus("Errore durante l'attivazione", false);
+    updateNotifyStatus("notify.status.error");
   }
 }
 
@@ -889,20 +1065,20 @@ function updateHud() {
 
 const TUTORIAL_STEPS = [
   {
-    title: "Prendi un pezzo",
-    text: "Scegli un blocco dal vassoio e trascinalo nel tabellone.",
+    titleKey: "tutorial.step1.title",
+    textKey: "tutorial.step1.text",
     targets: [".mobile-tray", ".tray-slot", ".board-frame"],
     padding: 10,
   },
   {
-    title: "Muovi e ruota",
-    text: "Tocca per ruotare, trascina per spostare. Swipe in giu per drop veloce.",
+    titleKey: "tutorial.step2.title",
+    textKey: "tutorial.step2.text",
     targets: [".board-frame"],
     padding: 12,
   },
   {
-    title: "Fai match",
-    text: "Unisci molti granuli dello stesso colore per fare punti.",
+    titleKey: "tutorial.step3.title",
+    textKey: "tutorial.step3.text",
     targets: [".board-frame"],
     padding: 12,
   },
@@ -993,14 +1169,14 @@ function showTutorialStep() {
     endTutorial();
     return;
   }
-  if (tutorialTitle) tutorialTitle.textContent = step.title;
-  if (tutorialText) tutorialText.textContent = step.text;
+  if (tutorialTitle) tutorialTitle.textContent = t(step.titleKey);
+  if (tutorialText) tutorialText.textContent = t(step.textKey);
   if (tutorialProgress) {
     tutorialProgress.textContent = `${tutorialStepIndex + 1}/${TUTORIAL_STEPS.length}`;
   }
   if (tutorialNextBtn) {
     tutorialNextBtn.textContent =
-      tutorialStepIndex === TUTORIAL_STEPS.length - 1 ? "START" : "AVANTI";
+      tutorialStepIndex === TUTORIAL_STEPS.length - 1 ? t("tutorial.start") : t("tutorial.next");
   }
   tutorial.classList.add("tutorial--show");
   tutorial.setAttribute("aria-hidden", "false");
@@ -1058,9 +1234,10 @@ function showSettings() {
   overlay.classList.remove("hidden");
 }
 
-function showMessage(title, text) {
+function showMessage(title, text, keys = null) {
   overlayTitle.textContent = title;
   overlayText.textContent = text;
+  overlayMessageKeys = keys;
   overlay.dataset.state = "message";
   overlay.classList.remove("hidden");
 }
@@ -1117,14 +1294,20 @@ function endGame() {
   }
   updateBestScore(score);
   renderBestScore();
-  showMessage("GAME OVER", "Tocca START o tap per ricominciare");
+  showMessage(t("menu.gameover.title"), t("menu.gameover.text"), {
+    titleKey: "menu.gameover.title",
+    textKey: "menu.gameover.text",
+  });
 }
 
 function togglePause() {
   if (!running) return;
   paused = !paused;
   if (paused) {
-    showMessage("PAUSA", "Tocca per riprendere");
+    showMessage(t("menu.pause.title"), t("menu.pause.text"), {
+      titleKey: "menu.pause.title",
+      textKey: "menu.pause.text",
+    });
   } else {
     hideOverlay();
   }
@@ -2057,6 +2240,7 @@ function loop(time) {
   requestAnimationFrame(loop);
 }
 
+initLanguage();
 renderLeaderboard(loadLeaderboard());
 showMenu();
 updateHud();
@@ -2121,15 +2305,10 @@ if (tutorialSkipBtn) {
   }
 
   if (isIos()) {
-    if (installHint) {
-      installHint.textContent =
-        "Su iPhone/iPad: tocca Condividi e scegli “Aggiungi alla schermata Home”.";
-    }
+    setInstallHint("install.hint.ios");
     showGate();
   } else {
-    if (installHint) {
-      installHint.textContent = "Premi il pulsante per aggiungere l'app alla Home.";
-    }
+    setInstallHint("install.hint.android");
     showGate();
   }
 
@@ -2144,9 +2323,7 @@ if (tutorialSkipBtn) {
         showGate();
         return;
       }
-      if (installHint) {
-        installHint.textContent = "Apri il menu del browser e scegli “Installa app”.";
-      }
+      setInstallHint("install.hint.manual");
       return;
     }
     deferredPrompt.prompt();
