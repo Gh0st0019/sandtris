@@ -1216,3 +1216,57 @@ input {
     animation: none;
   }
 }
+
+/* Compact layout for all screens: match the mobile style everywhere. */
+:root {
+  --bg-0: #4a33b8;
+  --bg-1: #5c43c9;
+  --bg-2: #3a2a92;
+  --panel: #2a1b66;
+  --panel-2: #251559;
+  --border: #1b103d;
+  --accent: #ffd666;
+  --accent-2: #4fdc7c;
+  --accent-3: #bdbdbd;
+  --text: #f5f3ff;
+  --muted: #d3cfff;
+  --board-width: min(72vw, 46dvh, 420px);
+}
+
+body {
+  overflow: hidden;
+  background: radial-gradient(circle at 20% 20%, #6e55e6 0%, transparent 45%),
+    radial-gradient(circle at 80% 0%, #5a3ed2 0%, transparent 40%),
+    linear-gradient(180deg, #6849d7, #3d2a9a 70%, #2a1f6f 100%);
+}
+
+body::before {
+  background-size: 10px 10px;
+  opacity: 0.25;
+}
+
+.app {
+  width: min(100%, 560px);
+  padding: 10px 12px 14px;
+  min-height: 100dvh;
+}
+
+.stage {
+  grid-template-columns: 1fr;
+  grid-template-areas: "board";
+  align-items: start;
+  justify-items: center;
+}
+
+.board-panel {
+  width: min(100%, calc(var(--board-width) + 24px));
+}
+
+.side-panel,
+.right-panel {
+  display: none;
+}
+
+.is-playing .top-bar {
+  display: grid;
+}
