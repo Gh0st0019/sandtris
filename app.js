@@ -317,17 +317,16 @@ function initGmailLink() {
   gmailLink.addEventListener("click", (event) => {
     if (!isIos && !isAndroid) return;
     event.preventDefault();
+    const encoded = encodeURIComponent(to);
     if (isIos) {
-      window.location.href = `googlegmail://co?to=${encodeURIComponent(to)}`;
+      window.location.href = `googlegmail://co?to=${encoded}`;
     } else if (isAndroid) {
-      const intent = `intent://compose?to=${encodeURIComponent(
-        to
-      )}#Intent;scheme=googlegmail;package=com.google.android.gm;end`;
+      const intent = `intent://sendto?to=${encoded}#Intent;scheme=mailto;package=com.google.android.gm;end`;
       window.location.href = intent;
     }
     setTimeout(() => {
-      window.location.href = `mailto:${encodeURIComponent(to)}`;
-    }, 650);
+      window.location.href = `mailto:${encoded}`;
+    }, 700);
   });
 }
 
